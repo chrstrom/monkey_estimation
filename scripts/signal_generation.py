@@ -7,19 +7,19 @@ class SampledSignal:
     # Get some variables loaded - import these later 
     self.A = 1
     self.Fs = 1e6
-    self.Ts = 1 / self.Fs
-    self.phi = pi / 8
-    self.sigma = 1
+    self.Ts = 1.0 / self.Fs
+    self.phi = pi / 8.0
+    self.sigma = 1.0
 
     self.f0 = 1e5
     self.omega0 = 2 * pi * self.f0 
 
-    self.SNR = pow(self.A, 2) / (2 * pow(self.sigma, 2))
+    self.SNR = pow(self.A, 2) / float((2 * pow(self.sigma, 2)))
 
     self.N = 513
 
-    self.P = self.N * (self.N - 1) / 2
-    self.Q = self.N * (self.N - 1) * (2 * self.N - 1) / 6
+    self.P = self.N * (self.N - 1) / 2.0
+    self.Q = self.N * (self.N - 1) * (2 * self.N - 1) / 6.0
 
     self.n0 = -self.P / self.N
 
@@ -39,3 +39,7 @@ class SampledSignal:
       n += 1
     
     return x
+
+
+if __name__ == "__main__":
+  test = SampledSignal()
