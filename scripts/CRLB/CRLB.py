@@ -1,14 +1,17 @@
 #!/usr/bin/env python
+import sys
+sys.path.append("..")
+from config import cfg
 
 class CRLB:
 
-    N = 513
-    T = 10e-6
-    A = 1
-    n0 = -256
+    N = cfg.N
+    T = cfg.Ts
+    A = cfg.A
+    n0 = cfg.n0
 
-    P = N * (N-1) / 2
-    Q = N * (N-1) * (2*N-1) / 6
+    P = cfg.P
+    Q = cfg.Q
 
     def omega(self, SNR):
 
