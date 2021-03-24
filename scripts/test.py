@@ -7,7 +7,9 @@ if __name__ == '__main__':
   SG = SampledSignal()
   x = SG.calculate_signal()
 
-  M = 100000
+  k = 20
+  M = pow(2, k)
+  print(M)
 
   F_DFT = FFT()
   x_zp = F_DFT.zero_pad(x, M)
