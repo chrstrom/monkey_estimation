@@ -26,7 +26,8 @@ class SampledSignal:
   def calculate_signal(self):
     # Generate the data for the sampled signal
     x = [0 for i in range(self.N)]
-    noise = np.random.normal(0, pow(self.sigma, 2), self.N)
+    noise_real = np.random.normal(0, pow(self.sigma, 2), self.N)
+    noise_imag = np.random.normal(0, pow(self.sigma, 2), self.N)
 
     n = self.n0
     omega0 = self.omega0
@@ -34,8 +35,10 @@ class SampledSignal:
     phi = self.phi
 
     for i in range(self.N):
-      z = complex(0, omega0 * n * Ts + phi)
-      x[i] = self.A * exp(z) + noise[i]
+      z_signal = complex(0, omega0 * n * Ts + phi)
+      z_noise = complex(noise_real[i], noise_imag[i])
+      
+      x[i] = self.A * exp(z_signal) + z_noise
       n += 1
     
     return x
