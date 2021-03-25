@@ -1,9 +1,14 @@
+#!/usr/bin/env python
+
 from cmath import exp, pi
 import numpy as np
 
-import sys
-sys.path.append("..")
-from config import cfg
+import cfg
+
+
+
+def sigma_squared_from_SNR(A, SNR):
+    return A**2 / (2*float(SNR))
 
 class Signals:
 
@@ -17,10 +22,12 @@ class Signals:
     n0  = cfg.n0
 
     phi = cfg.phi
-    sigma_noise = cfg.sigma_noise
 
     f0  = cfg.f0
     w0  = cfg.w0
+
+    SNR = cfg.SNR
+    sigma = sigma_squared_from_SNR(A, SNR)
 
     def F(self, w0):
         x = self.x_discrete()
@@ -33,7 +40,7 @@ class Signals:
     def x_discrete(self):
         # Generate the data for the sampled signal
         x = [0 for i in range(self.N)]
-        noise = np.random.normal(0, pow(self.sigma_noise, 2), self.N)
+        noise = np.random.normal(0, pow(self.sigma, 2), self.N)
 
         n = self.n0
         for i in range(self.N):

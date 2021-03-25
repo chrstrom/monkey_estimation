@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from cmath import pi
 
 N = 513
@@ -7,7 +9,8 @@ Ts = 1.0 / Fs
 
 A = 1
 phi = pi / 8.0
-sigma_noise = 1.0
+
+SNR = -10
 
 f0 = 1e5
 w0 = 2 * pi * f0 
