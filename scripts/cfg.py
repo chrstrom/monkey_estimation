@@ -3,6 +3,7 @@
 from cmath import pi
 
 N = 513
+M = 2**10
 
 Fs = 1e6
 Ts = 1.0 / Fs

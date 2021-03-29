@@ -1,0 +1,30 @@
+import fast_dtft 
+from signal_generation import SampledSignal
+
+import matplotlib.pyplot as plt
+
+if __name__ == '__main__':
+  SG = SampledSignal()
+  x = SG.calculate_signal()
+
+  k = 20
+  M = pow(2, k)
+  print(M)
+
+  F_DFT = fast_dtft.FastDTFT()
+  x_zp = F_DFT.zero_pad(x, M)
+
+  X = F_DFT.fast_dtft(x, M)
+  
+  # print(x)
+  # print(X)
+
+  # x_abs = F_DFT.magnitude(x)
+  X_abs = F_DFT.magnitude(X)
+  X_pha = F_DFT.phase(X)
+
+  plt.plot(X_abs)
+  plt.show()
+
+  plt.plot(X_pha)
+  plt.show()

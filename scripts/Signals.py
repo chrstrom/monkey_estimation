@@ -2,9 +2,10 @@
 
 from cmath import exp, pi
 import numpy as np
+import matplotlib.pyplot as plt
 
 import cfg
-
+import fast_dtft
 
 
 def sigma_squared_from_SNR(A, SNR):
@@ -51,9 +52,15 @@ class Signals:
         return x
 
 if __name__ == '__main__':
+    obj = fast_dtft.FastDTFT()
     sig = Signals()
     print(sig.F(0.1))
 
     x = sig.x_discrete()
-    print(x[1])
-    print(len(x))
+
+    signal = obj.zero_pad(x)
+    fourier = obj.fast_dtft(x)
+
+    norm = np.linalg.norm(fourier)
+    plt.plot(abs(fourier) / norm)
+    plt.show()
