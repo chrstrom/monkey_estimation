@@ -47,7 +47,7 @@ class FastDTFT:
     phase = [0 for i in range(len(signal))] 
 
     for i in range(len(signal)):
-      phase[i] = -atan2(signal[i].imag, signal[i].real)
+      phase[i] = atan2(signal[i].imag, signal[i].real)
     
     return phase
 
