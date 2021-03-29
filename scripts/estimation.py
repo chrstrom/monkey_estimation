@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from fast_dtft import FastDTFT
 import Signals
 import cfg
@@ -5,6 +7,7 @@ import cfg
 from math import atan2
 from cmath import exp, pi
 
+import numpy as np
 
 class Estimators:
   def __init__(self):
@@ -14,19 +17,10 @@ class Estimators:
     self.T = cfg.Ts
     self.n0 = cfg.n0
 
-  def calculate_m_star(self, magnitude_signal):
+  def calculate_m_star(self, signal):
     # Finds the index with the maximum magnitude
-    idx = 0
-    max_mag = 0
-
-    for i in range(len(magnitude_signal)):
-      if magnitude_signal[i] > max_mag:
-        idx = i
-
-    # We have found the idx belonging to the 'FFT-bucket'
-    omega_estimate = idx * (self.M / 100.0)
-
-    return omega_estimate
+    m = np.argmax(signal)
+    return m
 
   def F_omega0(self, signal, omega0):
     # Calculates the fourier and normalizes it
@@ -43,11 +37,12 @@ class Estimators:
     F_DTFT = FastDTFT()
 
     x_zp = F_DTFT.zero_pad(signal, self.M)
-    x_mag = F_DTFT.magnitude(x_zp)
+    x_fft, x_freq = F_DTFT.fast_dtft(x_zp)
 
-    m_star = self.calculate_m_star(x_mag)
+    m_star = self.calculate_m_star(x_fft)
 
-    return 2 * pi * m_star / (self.M * self.T)
+    omega_hat = 2 * pi * m_star / (self.M * self.T)
+    return omega_hat
 
   def estimate_phase(self, signal):
     # Estimates the phase of the signal
@@ -55,12 +50,13 @@ class Estimators:
 
     F_omega_estimate = self.F_omega0(signal, omega_estimate)
 
-    for i in range(len(signal)):
-      if signal[i] == complex(0,0):
-        print("May be zero-padding error at index ", i)
-
     adjusted_angle = exp(complex(0, -omega_estimate * self.n0 * self.T)) * F_omega_estimate
-    return atan2(adjusted_angle.imag, adjusted_angle.real)
+    phi_hat = atan2(adjusted_angle.imag, adjusted_angle.real)
+
+    if phi_hat < 0:
+      phi_hat += pi
+      
+    return phi_hat
 
 if __name__ == '__main__':
   Estimates = Estimators()
@@ -75,5 +71,6 @@ if __name__ == '__main__':
   omega_estimate = Estimates.estimate_omega(signal)
   phase_estimate = Estimates.estimate_phase(signal)
 
-  print(omega_estimate)
+  print("True omega: %s, calculated omega")
+  print(omega_estimate/cfg.Fs)
   print(phase_estimate)

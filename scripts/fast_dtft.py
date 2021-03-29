@@ -12,9 +12,12 @@ class FastDTFT:
     self.M = cfg.M
     self.Fs = cfg.Fs
 
-  def zero_pad(self, signal):
+  def zero_pad(self, signal, M=None):
+    if M is None:
+      M = self.M
+
     # zero-padding such that the system can take M-point FFT
-    for i in range(self.M - len(signal)):
+    for i in range(M - len(signal)):
       signal.append(0)
     return signal
 
