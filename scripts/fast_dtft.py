@@ -8,12 +8,16 @@ class FastDTFT:
     pass
 
   def zero_pad(self, signal, M):
-    # Must zero-pad such that the system can take M-point FFT
-    return signal.extend([0 for i in range(0, M - len(signal))])
+    # zero-padding such that the system can take M-point FFT
+    for i in range(M - len(signal)):
+      signal.append(0)
+    return signal
+    # return signal.extend([0 for i in range(0, M - len(signal))])
 
   def fast_dtft(self, signal, M):
     # M number of fft-points
-    assert len(signal) == M      
+    if len(signal) < M:
+      signal = zero_pad(signal)      
 
     return fft(signal, M)
 
