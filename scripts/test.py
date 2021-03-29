@@ -1,11 +1,12 @@
 import fast_dtft 
 from signal_generation import SampledSignal
+from Signals import Signals
 
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-  SG = SampledSignal()
-  x = SG.calculate_signal()
+  SG = Signals()
+  x = SG.x_discrete()
 
   k = 20
   M = pow(2, k)
@@ -14,7 +15,7 @@ if __name__ == '__main__':
   F_DTFT = fast_dtft.FastDTFT()
   x_zp = F_DTFT.zero_pad(x, M)
 
-  X = F_DTFT.fast_dtft(x, M)
+  X = F_DTFT.fast_dtft(x)
   
   # print(x)
   # print(X)

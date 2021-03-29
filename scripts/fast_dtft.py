@@ -4,7 +4,7 @@ import numpy as np
 import cfg 
 
 from math import atan2
-from scipy import fft, ifft
+from scipy import fft
 
 
 class FastDTFT:
@@ -19,13 +19,13 @@ class FastDTFT:
 
   def fast_dtft(self, signal):
     # M number of fft-points
-    if len(signal) < M:
+    if len(signal) < self.M:
       signal = zero_pad(signal)      
 
-    return fft(signal, self.M)
+    return fft.fft(signal, self.M)
 
   def magnitude(self, signal):
-    # Return || signal ||_{2} ^ 2
+    # Return || signal ||_{2}
     magnitude = [0 for i in range(len(signal))]
     
     for i in range(len(signal)):

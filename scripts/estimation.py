@@ -1,36 +1,40 @@
 from fast_dtft import FastDTFT
-import signal_generation
+import Signals
+import cfg
 
 from math import atan2
 from cmath import exp, pi
 
 
 class Estimators:
-  def __init__(self, parameters):
-    # Init the class with the parameters:
-    #  N, M, T, n0
-    self.N = parameters.get('N')
-    self.M = parameters.get('M')
-    self.T = parameters.get('T')
-    self.n0 = parameters.get('n0')
+  def __init__(self):
+    # Init the class with parameters from config-file
+    self.N = cfg.N
+    self.M = cfg.M
+    self.T = cfg.Ts
+    self.n0 = cfg.n0
 
   def calculate_m_star(self, magnitude_signal):
     # Finds the index with the maximum magnitude
     idx = 0
     max_mag = 0
-    
+
     for i in range(len(magnitude_signal)):
-      if abs(magnitude_signal[i]) > max_mag:
+      if magnitude_signal[i] > max_mag:
         idx = i
 
-    return idx
+    # We have found the idx belonging to the 'FFT-bucket'
+    omega_estimate = idx * (self.M / 100.0)
+
+    return omega_estimate
 
   def F_omega0(self, signal, omega0):
-    # Calculates the fourier, and normalizes it
+    # Calculates the fourier and normalizes it
     complex_sum = complex(0, 0)
 
-    for n in range(len(signal)):
+    for n in range(0, len(signal)):
       complex_sum += (signal[n] * exp(complex(0, -omega0 * n * self.T)))
+      #print(complex_sum)
     
     return complex_sum / self.N
 
@@ -51,16 +55,22 @@ class Estimators:
 
     F_omega_estimate = self.F_omega0(signal, omega_estimate)
 
+    for i in range(len(signal)):
+      if signal[i] == complex(0,0):
+        print("May be zero-padding error at index ", i)
+
     adjusted_angle = exp(complex(0, -omega_estimate * self.n0 * self.T)) * F_omega_estimate
     return atan2(adjusted_angle.imag, adjusted_angle.real)
 
 if __name__ == '__main__':
-  parameters = {'N': 513, 'M': 1024, 'T': 1e-6, 'n0': -256}
+  Estimates = Estimators()
+  SG = Signals.Signals()
 
-  Estimates = Estimators(parameters)
-  X = signal_generation.SampledSignal()
+  signal = SG.x_discrete()
 
-  signal = X.generate_sampled_signal()
+  for i in range(len(signal)):
+    if signal[i] == complex(0,0):
+      print("May be zero-padding error at index ", i)
 
   omega_estimate = Estimates.estimate_omega(signal)
   phase_estimate = Estimates.estimate_phase(signal)
