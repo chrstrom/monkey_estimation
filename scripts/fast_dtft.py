@@ -47,8 +47,11 @@ class FastDTFT:
     phase = [0 for i in range(len(signal))] 
 
     for i in range(len(signal)):
-      phase[i] = atan2(signal[i].imag, signal[i].real)
-    
+      try:
+        phase[i] = atan2(signal[i].imag, signal[i].real)
+      except Exception as e:
+        print((signal[i].imag, signal[i].real))
+        phase[i] = 0    
     return phase
 
     
