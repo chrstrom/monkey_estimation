@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from fast_dtft import FastDTFT
 import Signals
 import cfg
@@ -20,11 +22,11 @@ class Estimators:
     max_mag = 0
 
     for i in range(len(magnitude_signal)):
-      if magnitude_signal[i] > max_mag:
+      if abs(magnitude_signal[i]) > max_mag:
         idx = i
 
     # We have found the idx belonging to the 'FFT-bucket'
-    omega_estimate = idx * (self.M / 100.0)
+    omega_estimate = idx
 
     return omega_estimate
 
@@ -34,7 +36,6 @@ class Estimators:
 
     for n in range(0, len(signal)):
       complex_sum += (signal[n] * exp(complex(0, -omega0 * n * self.T)))
-      #print(complex_sum)
     
     return complex_sum / self.N
 
@@ -42,9 +43,8 @@ class Estimators:
     # Estimates the signals angular frequency
     F_DTFT = FastDTFT()
 
-    x_zp = F_DTFT.zero_pad(signal, self.M)
-    x_mag = F_DTFT.magnitude(x_zp)
-
+    x_f, Ff = F_DTFT.fast_dtft(signal)
+    x_mag = F_DTFT.magnitude(x_f)
     m_star = self.calculate_m_star(x_mag)
 
     return 2 * pi * m_star / (self.M * self.T)
@@ -55,10 +55,6 @@ class Estimators:
 
     F_omega_estimate = self.F_omega0(signal, omega_estimate)
 
-    for i in range(len(signal)):
-      if signal[i] == complex(0,0):
-        print("May be zero-padding error at index ", i)
-
     adjusted_angle = exp(complex(0, -omega_estimate * self.n0 * self.T)) * F_omega_estimate
     return atan2(adjusted_angle.imag, adjusted_angle.real)
 
@@ -68,12 +64,11 @@ if __name__ == '__main__':
 
   signal = SG.x_discrete()
 
-  for i in range(len(signal)):
-    if signal[i] == complex(0,0):
-      print("May be zero-padding error at index ", i)
-
   omega_estimate = Estimates.estimate_omega(signal)
   phase_estimate = Estimates.estimate_phase(signal)
+
+  if phase_estimate < 0:
+    phase_estimate += pi
 
   print(omega_estimate)
   print(phase_estimate)

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import fast_dtft 
 from signal_generation import SampledSignal
 from Signals import Signals
