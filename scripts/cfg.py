@@ -10,7 +10,8 @@ Ts = 1.0 / Fs
 A = 1
 phi = pi / 8.0
 
-SNR = -10
+SNR_dB = -60.0
+SNR = 10**(SNR_dB/10.0)
 
 f0 = 1e5
 w0 = 2 * pi * f0 
