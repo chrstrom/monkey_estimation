@@ -10,10 +10,10 @@ from scripts import cfg
 import scipy
 
 sig = Signals.Signals()
-FFT = fast_dtft.FastDTFT()
+fft = fast_dtft.FastDTFT()
 
 x = sig.x_discrete()
-Fx, Ff = FFT.fast_dtft(x)
+Fx, Ff = fft.fast_dtft(x)
 
 plt.plot(Ff, abs(Fx))
 plt.xlabel("Frequency [Hz]")
