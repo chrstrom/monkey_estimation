@@ -1,4 +1,4 @@
-from fft import FFT
+import fast_dtft 
 from signal_generation import SampledSignal
 
 import matplotlib.pyplot as plt
@@ -11,10 +11,10 @@ if __name__ == '__main__':
   M = pow(2, k)
   print(M)
 
-  F_DFT = FFT()
+  F_DFT = fast_dtft.FastDTFT()
   x_zp = F_DFT.zero_pad(x, M)
 
-  X = F_DFT.fast_dft(x, M)
+  X = F_DFT.fast_dtft(x, M)
   
   # print(x)
   # print(X)
