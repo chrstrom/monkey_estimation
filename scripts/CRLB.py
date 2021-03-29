@@ -1,38 +1,40 @@
 #!/usr/bin/env python
 
+import cfg
+import Signals as sig
+
 class CRLB:
 
-    N = 513
-    T = 10e-6
-    A = 1
-    n0 = -256
+    N = cfg.N
+    T = cfg.Ts
+    A = cfg.A
+    n0 = cfg.n0
 
-    P = N * (N-1) / 2
-    Q = N * (N-1) * (2*N-1) / 6
+    P = cfg.P
+    Q = cfg.Q
+    
+    SNR = cfg.SNR
 
-    def omega(self, SNR):
+    def omega(self):
 
-        sigma_squared = self.sigma_squared_from_SNR(SNR)
+        sigma_squared = sig.sigma_squared_from_SNR(self.A, self.SNR)
 
         numerator = 12*sigma_squared
         denominator = self.A**2 * self.T**2 * self.N*(self.N**2 - 1)
 
         return numerator / denominator
 
-    def phi(self, SNR):
-        sigma_squared = self.sigma_squared_from_SNR(SNR)
+    def phi(self):
+        sigma_squared = sig.sigma_squared_from_SNR(self.A, self.SNR)
 
         numerator = 12*sigma_squared*(self.n0**2 * self.N + 2*self.n0*self.P + self.Q)
         denominator = self.A**2 * self.N**2 * (self.N**2 - 1)
 
         return numerator / denominator
 
-    def sigma_squared_from_SNR(self, SNR):
-        return self.A**2 / (2*float(SNR))
-
 
 
 if __name__ == '__main__':
     crlb = CRLB()
 
-    print(crlb.omega(1))
+    print(crlb.omega())

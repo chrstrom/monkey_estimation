@@ -43,3 +43,4 @@ class SampledSignal:
 
 if __name__ == "__main__":
   test = SampledSignal()
+  print(test.calculate_signal())
