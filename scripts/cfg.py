@@ -2,7 +2,7 @@
 
 from cmath import pi
 
-k = 22
+k = 10
 
 N = 513
 M = 2**k
@@ -13,7 +13,7 @@ Ts = 1.0 / Fs
 A = 1
 phi = pi / 8.0
 
-SNR_dB = 90.0              # [-10, 60]
+SNR_dB = 10.0              # [-10, 60]
 SNR = 10**(SNR_dB/10.0)
 
 f0 = 1e5

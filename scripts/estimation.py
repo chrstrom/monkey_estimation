@@ -20,7 +20,7 @@ class Estimators:
 
   def calculate_m_star(self, magnitude_signal):
     # Finds the index with the maximum magnitude
-    return np.argmax(magnitude_signal)
+    return np.argmax(magnitude_signal) / 6.0
 
   def F_omega0(self, signal, omega0):
     # Calculates the fourier and normalizes it
@@ -39,7 +39,7 @@ class Estimators:
     x_mag = F_DTFT.magnitude(x_f)
     m_star = self.calculate_m_star(x_mag)
 
-    return 2 * pi * m_star / (6 * self.M * self.T)
+    return 2 * pi * m_star / (self.M * self.T)
 
   def estimate_phase(self, signal):
     # Estimates the phase of the signal
