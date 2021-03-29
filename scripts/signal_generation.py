@@ -23,7 +23,7 @@ class SampledSignal:
 
     self.n0 = -self.P / self.N
 
-  def calculate_signal(self):
+  def generate_sampled_signal(self):
     # Generate the data for the sampled signal
     x = [0 for i in range(self.N)]
     noise_real = np.random.normal(0, pow(self.sigma, 2), self.N)
