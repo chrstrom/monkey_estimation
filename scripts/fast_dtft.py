@@ -1,21 +1,25 @@
+#!/usr/bin/env python
+
 import numpy as np
+import cfg 
 
 from math import atan2
-from scipy.fft import fft, ifft
+from scipy import fft, ifft
+
 
 class FastDTFT:
   def __init__(self):
-    pass
+    self.M = cfg.M
 
-  def zero_pad(self, signal, M):
+  def zero_pad(self, signal):
     # Must zero-pad such that the system can take M-point FFT
-    return signal.extend([0 for i in range(0, M - len(signal))])
+    return signal.extend([0 for i in range(0, self.M - len(signal))])
 
-  def fast_dtft(self, signal, M):
+  def fast_dtft(self, signal):
     # M number of fft-points
-    assert len(signal) == M      
+    assert len(signal) == self.M      
 
-    return fft(signal, M)
+    return fft(signal, self.M)
 
   def magnitude(self, signal):
     # Return || signal ||_{2} ^ 2
@@ -38,5 +42,3 @@ class FastDTFT:
     return phase
 
     
-
-
