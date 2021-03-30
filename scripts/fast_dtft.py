@@ -23,7 +23,7 @@ class FastDTFT:
     if len(signal) < self.M:
       signal = self.zero_pad(signal)       
 
-    Fx = fft.fft(signal, self.M)
+    Fx = fft(signal, self.M)
     Ff = fftpack.fftfreq(self.M, 1 / self.Fs)
 
     Fx = fftpack.fftshift(Fx)
