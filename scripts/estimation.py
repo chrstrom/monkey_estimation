@@ -39,7 +39,9 @@ class Estimators:
     x_mag = F_DTFT.magnitude(x_f)
     m_star = self.calculate_m_star(x_mag)
 
-    return 2 * pi * m_star / (self.M * self.T)
+    omega_hat =  2 * pi * m_star / (self.M * self.T)
+    
+    return omega_hat
 
   def estimate_phase(self, signal):
     # Estimates the phase of the signal
@@ -48,7 +50,9 @@ class Estimators:
     F_omega_estimate = self.F_omega0(signal, omega_estimate)
 
     adjusted_angle = exp(complex(0, -omega_estimate * self.n0 * self.T)) * F_omega_estimate
-    return atan2(adjusted_angle.imag, adjusted_angle.real)
+    phi_hat = atan2(adjusted_angle.imag, adjusted_angle.real)
+
+    return phi_hat
 
 if __name__ == '__main__':
   Estimates = Estimators()
