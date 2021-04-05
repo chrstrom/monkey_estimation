@@ -8,25 +8,45 @@ from scripts import cfg
 
 from scipy import fft, ifft, fftpack
 
-def fast_dtft(self, signal):  
-  Fx = fft.fft(signal, self.M)
-  Ff = fftpack.fftfreq(self.M, 1 / self.Fs)
+def fast_dtft(signal, M):  
+    Fx = fft(signal, M)
+    Ff = fftpack.fftfreq(M, 1 / cfg.Fs)
 
-  Fx = fftpack.fftshift(Fx)
-  Ff = fftpack.fftshift(Ff)
-  
-  return Fx, Ff
+    Fx = fftpack.fftshift(Fx)
+    Ff = fftpack.fftshift(Ff)
+
+    return Fx, Ff
 
 
-if __name__ == 'main':
-  sig = Signals.Signals()
-  fft = fast_dtft.FastDTFT()
+SNR_dBs = [-10, 0, 10, 20, 30, 40, 50, 60]
+FFT_Ks = [10, 12, 14, 16, 18, 20]
 
-  x = sig.x_discrete()
-  Fx, Ff = fft.fast_dtft(x)
+n = len(SNR_dBs)
+m = len(FFT_Ks)
 
-  plt.plot(Ff, abs(Fx))
-  plt.xlabel("Frequency [Hz]")
-  plt.ylabel("abs(Fx)")
-  plt.title("%d-point Fourier transform of x[n]" % cfg.M)
-  plt.show()
+num_plots_y = 2
+num_plots_x = m / num_plots_y
+
+for i in range(n):
+
+    SNR = SNR_dBs[i]
+
+    sig = Signals.Signals(SNR)
+    x = sig.x_discrete()
+
+    fig = plt.figure(i)
+    for j in range(m):
+        k = FFT_Ks[j]
+        M = 2**k
+        Fx, Ff = fast_dtft(x, M)
+
+        plt.subplot(num_plots_y, num_plots_x, j+1)
+        plt.plot(Ff, abs(Fx)/max(abs(Fx)), 'k')
+        plt.title("2^%d-point FFT for x[n], SNR = %d dB" % (k, SNR))
+
+        # Comparison between CRLB and sigma^2 goes here
+
+    fig.text(0.5, 0.04, "Frequency [Hz]", ha='center')
+    fig.text(0.04, 0.5, "abs(Fx)", va='center', rotation='vertical')
+
+plt.show()

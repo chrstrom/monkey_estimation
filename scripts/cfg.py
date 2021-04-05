@@ -2,8 +2,10 @@
 
 from cmath import pi
 
+k = 10
+
 N = 513
-M = 2**10
+M = 2**k
 
 Fs = 1e6
 Ts = 1.0 / Fs

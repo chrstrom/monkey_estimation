@@ -5,30 +5,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import cfg
-import fast_dtft
-
 
 def sigma_squared_from_SNR(A, SNR):
     return A**2 / (2*float(SNR))
 
 class Signals:
 
-    N   = cfg.N
-    Fs  = cfg.Fs
-    Ts  = cfg.Ts
-    A   = cfg.A
+    def __init__(self, SNR_dB=None):
+        self.N   = cfg.N
+        self.Fs  = cfg.Fs
+        self.Ts  = cfg.Ts
+        self.A   = cfg.A
 
-    P   = cfg.P
-    Q   = cfg.Q
-    n0  = cfg.n0
+        self.P   = cfg.P
+        self.Q   = cfg.Q
+        self.n0  = cfg.n0
 
-    phi = cfg.phi
+        self.phi = cfg.phi
 
-    f0  = cfg.f0
-    w0  = cfg.w0
+        self.f0  = cfg.f0
+        self.w0  = cfg.w0
 
-    SNR = cfg.SNR
-    sigma = sigma_squared_from_SNR(A, SNR)
+        if SNR_dB is None:
+            self.SNR = cfg.SNR
+        else:
+            self.SNR = 10**(SNR_dB/10.0)
+
+        self.sigma = sigma_squared_from_SNR(self.A, self.SNR)
 
     def F(self, w0):
         x = self.x_discrete()
@@ -51,18 +54,3 @@ class Signals:
             n += 1
 
         return x
-
-if __name__ == '__main__':
-    obj = fast_dtft.FastDTFT()
-    sig = Signals()
-    print(sig.F(0.1))
-
-    x = np.array(sig.x_discrete())
-
-    # signal = obj.zero_pad(x)
-    fourier, frequencies = obj.fast_dtft(x)
-
-    norm = np.linalg.norm(fourier)
-    plt.plot(np.absolute(fourier).tolist() / norm)
-    plt.show()
-
