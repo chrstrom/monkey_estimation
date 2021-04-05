@@ -4,10 +4,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scripts import Signals
-from scripts import fast_dtft
 from scripts import cfg
 
-import math
+from scipy import fft, ifft, fftpack
+
+def fast_dtft(signal, M):  
+    Fx = fft(signal, M)
+    Ff = fftpack.fftfreq(M, 1 / cfg.Fs)
+
+    Fx = fftpack.fftshift(Fx)
+    Ff = fftpack.fftshift(Ff)
+
+    return Fx, Ff
+
 
 SNR_dBs = [-10, 0, 10, 20, 30, 40, 50, 60]
 FFT_Ks = [10, 12, 14, 16, 18, 20]
@@ -29,8 +38,7 @@ for i in range(n):
     for j in range(m):
         k = FFT_Ks[j]
         M = 2**k
-        fft = fast_dtft.FastDTFT(M)
-        Fx, Ff = fft.fast_dtft(x)
+        Fx, Ff = fast_dtft(x, M)
 
         plt.subplot(num_plots_y, num_plots_x, j+1)
         plt.plot(Ff, abs(Fx)/max(abs(Fx)), 'k')

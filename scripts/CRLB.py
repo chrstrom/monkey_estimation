@@ -42,3 +42,4 @@ if __name__ == '__main__':
     crlb = CRLB()
 
     print(crlb.omega())
+    print(crlb.phi())

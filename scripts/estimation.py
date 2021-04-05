@@ -7,7 +7,6 @@ import cfg
 from math import atan2
 from cmath import exp, pi
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 class Estimators:
@@ -18,9 +17,17 @@ class Estimators:
     self.T = cfg.Ts
     self.n0 = cfg.n0
 
-  def calculate_m_star(self, magnitude_signal):
+  def calculate_m_star(self, signal):
     # Finds the index with the maximum magnitude
-    return np.argmax(magnitude_signal) / 6.0
+    m = np.argmax(signal)
+
+    # Change m to counteract the shift in FFT
+    if m > self.N:
+      m = m - self.N
+    else:
+      m = self.N - m
+
+    return m
 
   def F_omega0(self, signal, omega0):
     # Calculates the fourier and normalizes it
@@ -33,14 +40,14 @@ class Estimators:
 
   def estimate_omega(self, signal):
     # Estimates the signals angular frequency
-    F_DTFT = FastDTFT()
+    f_dtft = FastDTFT()
 
-    x_f, Ff = F_DTFT.fast_dtft(signal)
-    x_mag = F_DTFT.magnitude(x_f)
-    m_star = self.calculate_m_star(x_mag)
+    #x_zp = F_DTFT.zero_pad(signal, self.M)
+    x_fft, x_freq = f_dtft.fast_dtft(signal)
 
-    omega_hat =  2 * pi * m_star / (self.M * self.T)
-    
+    m_star = self.calculate_m_star(x_fft)
+
+    omega_hat = 2 * pi * m_star / (self.M * self.T)
     return omega_hat
 
   def estimate_phase(self, signal):
@@ -52,19 +59,23 @@ class Estimators:
     adjusted_angle = exp(complex(0, -omega_estimate * self.n0 * self.T)) * F_omega_estimate
     phi_hat = atan2(adjusted_angle.imag, adjusted_angle.real)
 
+    if phi_hat < 0:
+      phi_hat += pi
+      
     return phi_hat
 
 if __name__ == '__main__':
-  Estimates = Estimators()
-  SG = Signals.Signals()
+  est = Estimators()
+  sig = Signals.Signals()
 
-  signal = SG.x_discrete()
+  signal = sig.x_discrete()
 
-  omega_estimate = Estimates.estimate_omega(signal)
-  phase_estimate = Estimates.estimate_phase(signal)
+  for i in range(len(signal)):
+    if signal[i] == complex(0,0):
+      print("May be zero-padding error at index ", i)
 
-  if phase_estimate < 0:
-    phase_estimate += pi
+  omega_estimate = est.estimate_omega(signal)
+  phase_estimate = est.estimate_phase(signal)
 
-  print(omega_estimate)
-  print(phase_estimate)
+  print("True omega: {}, estimated omega: {}".format(cfg.f0*2*pi, omega_estimate))
+  print("True phase: {}, estimated phase: {}".format(cfg.phi, phase_estimate))
