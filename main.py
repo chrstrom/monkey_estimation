@@ -32,8 +32,10 @@ for i in range(m):
         for k in range(N):
             x_d = sig.x_discrete()
 
-            omega_estimates[k] = M_point_estimator.estimate_omega(x_d)
-            phase_estimates[k] = M_point_estimator.estimate_phase(x_d)
+            omega_hat, phi_hat = M_point_estimator.estimate_omega_and_phi(x_d)
+
+            omega_estimates[k] = omega_hat
+            phase_estimates[k] = phi_hat
 
         var_omega = np.var(omega_estimates)
         var_phase = np.var(phase_estimates)

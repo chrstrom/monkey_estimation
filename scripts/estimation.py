@@ -74,16 +74,16 @@ class FFTEstimator:
     return omega_hat
 
 
-  def estimate_phase(self, x_d):
+  def estimate_omega_and_phi(self, x_d):
     # Estimates the phase of the signal
-    omega_estimate = self.estimate_omega(x_d)
+    omega_hat = self.estimate_omega(x_d)
 
-    F_omega_estimate = self.F_omega0(x_d, omega_estimate)
+    F_omega_estimate = self.F_omega0(x_d, omega_hat)
 
-    adjusted_angle = exp(complex(0, -omega_estimate * self.n0 * self.T)) * F_omega_estimate
+    adjusted_angle = exp(complex(0, -omega_hat * self.n0 * self.T)) * F_omega_estimate
     phi_hat = atan2(adjusted_angle.imag, adjusted_angle.real)
 
     if phi_hat < 0:
       phi_hat += pi
       
-    return phi_hat
+    return omega_hat, phi_hat
