@@ -6,27 +6,27 @@ from Signals import Signals
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-  SG = Signals()
-  x = SG.x_discrete()
+  sig = Signals()
+  x = sig.x_discrete()
 
   k = 20
   M = pow(2, k)
   print(M)
 
-  F_DTFT = fast_dtft.FastDTFT()
-  x_zp = F_DTFT.zero_pad(x, M)
+  f_dtft = fast_dtft.FastDTFT()
+  # x_zp = f_dtft.zero_pad(x, M)
 
-  X = F_DTFT.fast_dtft(x)
+  Fx = f_dtft.fast_dtft(x)
   
   # print(x)
   # print(X)
 
   # x_abs = F_DTFT.magnitude(x)
-  X_abs = F_DTFT.magnitude(X)
-  X_pha = F_DTFT.phase(X)
+  # X_abs = F_DTFT.magnitude(X)
+  # X_pha = F_DTFT.phase(X)
 
-  plt.plot(X_abs)
-  plt.show()
+  # plt.plot(X_abs)
+  # plt.show()
 
-  plt.plot(X_pha)
-  plt.show()
+  # plt.plot(X_pha)
+  # plt.show()
