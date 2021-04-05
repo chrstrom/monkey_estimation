@@ -13,22 +13,27 @@ def sigma_squared_from_SNR(A, SNR):
 
 class Signals:
 
-    N   = cfg.N
-    Fs  = cfg.Fs
-    Ts  = cfg.Ts
-    A   = cfg.A
+    def __init__(self, SNR_dB=None):
+        self.N   = cfg.N
+        self.Fs  = cfg.Fs
+        self.Ts  = cfg.Ts
+        self.A   = cfg.A
 
-    P   = cfg.P
-    Q   = cfg.Q
-    n0  = cfg.n0
+        self.P   = cfg.P
+        self.Q   = cfg.Q
+        self.n0  = cfg.n0
 
-    phi = cfg.phi
+        self.phi = cfg.phi
 
-    f0  = cfg.f0
-    w0  = cfg.w0
+        self.f0  = cfg.f0
+        self.w0  = cfg.w0
 
-    SNR = cfg.SNR
-    sigma = sigma_squared_from_SNR(A, SNR)
+        if SNR_dB is None:
+            self.SNR = cfg.SNR
+        else:
+            self.SNR = 10**(SNR_dB/10.0)
+
+        self.sigma = sigma_squared_from_SNR(self.A, self.SNR)
 
     def F(self, w0):
         x = self.x_discrete()

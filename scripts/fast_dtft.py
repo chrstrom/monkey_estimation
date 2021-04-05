@@ -8,8 +8,13 @@ from scipy import fft, ifft, fftpack
 
 
 class FastDTFT:
-  def __init__(self):
-    self.M = cfg.M
+  def __init__(self, M=None):
+    
+    if M is None:
+      self.M = cfg.M
+    else:
+      self.M = M
+
     self.Fs = cfg.Fs
 
   def zero_pad(self, signal):
