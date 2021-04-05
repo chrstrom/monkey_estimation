@@ -4,49 +4,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scripts import Signals
-from scripts import cfg
+from scripts import estimation
+from scripts import CRLB
 
 from scipy import fft, ifft, fftpack
 
-def fast_dtft(signal, M):  
-    Fx = fft(signal, M)
-    Ff = fftpack.fftfreq(M, 1 / cfg.Fs)
-
-    Fx = fftpack.fftshift(Fx)
-    Ff = fftpack.fftshift(Ff)
-
-    return Fx, Ff
-
-
 SNR_dBs = [-10, 0, 10, 20, 30, 40, 50, 60]
-FFT_Ks = [10, 12, 14, 16, 18, 20]
+FFT_Ks = [10, 12, 14]#, 16, 18, 20] # Commented out for performance boost when testing
 
 n = len(SNR_dBs)
 m = len(FFT_Ks)
+N = 100 # Amount of samples to generate when estimating variance
 
-num_plots_y = 2
-num_plots_x = m / num_plots_y
+for i in range(m):
+    K = FFT_Ks[i]
+    M = 2**K
 
-for i in range(n):
+    M_point_estimator = estimation.FFTEstimator(M)
 
-    SNR = SNR_dBs[i]
+    for j in range(n):
+        SNR = SNR_dBs[j]
+        sig = Signals.Signals(SNR)
+        crlb = CRLB.CRLB(SNR)
 
-    sig = Signals.Signals(SNR)
-    x = sig.x_discrete()
+        omega_estimates = np.zeros(N)
+        phase_estimates = np.zeros(N)
+        for k in range(N):
+            x_d = sig.x_discrete()
 
-    fig = plt.figure(i)
-    for j in range(m):
-        k = FFT_Ks[j]
-        M = 2**k
-        Fx, Ff = fast_dtft(x, M)
+            omega_hat, phi_hat = M_point_estimator.estimate_omega_and_phi(x_d)
 
-        plt.subplot(num_plots_y, num_plots_x, j+1)
-        plt.plot(Ff, abs(Fx)/max(abs(Fx)), 'k')
-        plt.title("2^%d-point FFT for x[n], SNR = %d dB" % (k, SNR))
+            omega_estimates[k] = omega_hat
+            phase_estimates[k] = phi_hat
 
-        # Comparison between CRLB and sigma^2 goes here
+        var_omega = np.var(omega_estimates)
+        var_phase = np.var(phase_estimates)
 
-    fig.text(0.5, 0.04, "Frequency [Hz]", ha='center')
-    fig.text(0.04, 0.5, "abs(Fx)", va='center', rotation='vertical')
+        print("Samples: {}, SNR: {}, M: 2^{}, var_omega: {}, CRLB: {}".format(N, SNR, K, var_omega, crlb.omega()))
+        print("Samples: {}, SNR: {}, M: 2^{}, var_phase: {}, CRLB: {}".format(N, SNR, K, var_phase, crlb.phi()))
 
-plt.show()
+    print("") # Newline

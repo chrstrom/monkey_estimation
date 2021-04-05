@@ -5,7 +5,7 @@ import Signals as sig
 
 class CRLB:
 
-    def __init__(self, SNR_dB=None):
+    def __init__(self, SNR_dB):
         self.N = cfg.N
         self.T = cfg.Ts
         self.A = cfg.A
@@ -14,10 +14,7 @@ class CRLB:
         self.P = cfg.P
         self.Q = cfg.Q
         
-        if SNR_dB is None:
-            self.SNR = cfg.SNR
-        else:
-            self.SNR = 10**(SNR_dB/10.0)
+        self.SNR = 10**(SNR_dB/10.0)
 
     def omega(self):
 
