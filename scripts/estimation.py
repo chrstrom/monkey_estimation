@@ -20,6 +20,13 @@ class Estimators:
   def calculate_m_star(self, signal):
     # Finds the index with the maximum magnitude
     m = np.argmax(signal)
+
+    # Change m to counteract the shift in FFT
+    if m > self.N:
+      m = m - self.N
+    else:
+      m = self.N - m
+
     return m
 
   def F_omega0(self, signal, omega0):
@@ -28,16 +35,15 @@ class Estimators:
 
     for n in range(0, len(signal)):
       complex_sum += (signal[n] * exp(complex(0, -omega0 * n * self.T)))
-      #print(complex_sum)
     
     return complex_sum / self.N
 
   def estimate_omega(self, signal):
     # Estimates the signals angular frequency
-    F_DTFT = FastDTFT()
+    f_dtft = FastDTFT()
 
-    x_zp = F_DTFT.zero_pad(signal, self.M)
-    x_fft, x_freq = F_DTFT.fast_dtft(x_zp)
+    #x_zp = F_DTFT.zero_pad(signal, self.M)
+    x_fft, x_freq = f_dtft.fast_dtft(signal)
 
     m_star = self.calculate_m_star(x_fft)
 
@@ -59,18 +65,17 @@ class Estimators:
     return phi_hat
 
 if __name__ == '__main__':
-  Estimates = Estimators()
-  SG = Signals.Signals()
+  est = Estimators()
+  sig = Signals.Signals()
 
-  signal = SG.x_discrete()
+  signal = sig.x_discrete()
 
   for i in range(len(signal)):
     if signal[i] == complex(0,0):
       print("May be zero-padding error at index ", i)
 
-  omega_estimate = Estimates.estimate_omega(signal)
-  phase_estimate = Estimates.estimate_phase(signal)
+  omega_estimate = est.estimate_omega(signal)
+  phase_estimate = est.estimate_phase(signal)
 
-  print("True omega: %s, calculated omega")
-  print(omega_estimate/cfg.Fs)
-  print(phase_estimate)
+  print("True omega: {}, estimated omega: {}".format(cfg.f0*2*pi, omega_estimate))
+  print("True phase: {}, estimated phase: {}".format(cfg.phi, phase_estimate))
