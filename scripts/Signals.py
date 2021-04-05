@@ -57,11 +57,12 @@ if __name__ == '__main__':
     sig = Signals()
     print(sig.F(0.1))
 
-    x = sig.x_discrete()
+    x = np.array(sig.x_discrete())
 
-    signal = obj.zero_pad(x)
-    fourier = obj.fast_dtft(x)
+    # signal = obj.zero_pad(x)
+    fourier, frequencies = obj.fast_dtft(x)
 
     norm = np.linalg.norm(fourier)
-    plt.plot(abs(fourier) / norm)
+    plt.plot(np.absolute(fourier).tolist() / norm)
     plt.show()
+
