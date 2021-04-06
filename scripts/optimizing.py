@@ -38,7 +38,7 @@ class Optimize:
     else:
       self.SNR = SNR
 
-  def objective_function(self, x):
+  def frequency_objective_function(self, x):
     # Estimate number k for angular frequency from NM-algorithm 
     w_k = x[0]
 
@@ -58,16 +58,39 @@ class Optimize:
     return error_cal.mse(Fx_d, Fx_c)
 
 
-  def optimize_mse_nelder_mead(self, x0, max_iterations):
-    self.estimates = []
+  def phase_objective_function(self, x):
+    # Estimate number k for the phase
+    phi_k = x[0]
+
+    # Creating objects 
+    sig = Signals.Signals(self.SNR)
+    fft_est = estimation.FFTEstimator(self.M)
+    error_cal = error_calculation.ErrorCalculation()
+
+    # Must find a way to optimize for the phase as well...
+
+
+  def optimize_frequency_nelder_mead(self, x0, max_iterations):
+    self.frequencies = []
     self.mse = []
 
     for i in range(max_iterations):
-        estimate = optimize.minimize(self.objective_function, x0, method="Nelder-Mead")
-        self.estimates.append(estimate.x[0])
-        self.mse.append(self.f0 - estimate.x[0])
+        frequency = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
+        self.frequencies.append(frequency.x[0])
+        self.mse.append(self.f0 - frequency.x[0])
     
-    return self.estimates, self.mse
+    return self.frequencies, self.mse
+
+  def optimize_phase_nelder_mead(self, x0, max_iterations):
+    self.phases = []
+    self.mse = []
+
+    for i in range(max_iterations):
+        phase = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
+        self.frequencies.append(frequency.x[0])
+        self.mse.append(self.f0 - frequency.x[0])
+    
+    return self.frequencies, self.mse
 
   # Doesn't quite work
   # def plot_mse(self, min_frequency, max_frequency, frequency_step):
@@ -91,15 +114,16 @@ if __name__ == '__main__':
   max_iterations = 100
 
   # Get some warnings that I try to cast complex to real, which discrads imaginary value
-  iterates, mse = opt.optimize_mse_nelder_mead(x0, max_iterations)
+  frequencies, mse = opt.optimize_omega_nelder_mead(x0, max_iterations)
     
-  mean_iterations = statistics.mean(iterates)
+  mean_frequency = statistics.mean(frequencies)
   mean_mse = statistics.mean(mse)
   
   mse_variance = statistics.variance(mse, mean_mse)
 
-  print("Average frequency:", mean_iterations)
-  print("Average mse:", mean_mse)
-  print("Average mse variance:", mse_variance)
+  print("Average optimized frequency:", mean_frequency)
+  print("Average optimized mse:", mean_mse)
+  print("Average optimized mse variance:", mse_variance)
 
-  # opt.plot_mse(50000, 150000, 100)
+  # Optimize for the phase as well...
+
