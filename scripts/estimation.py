@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import Signals
+import Signals as sig
 import cfg
 from scipy import fft, fftpack
 
@@ -21,7 +21,7 @@ class FFTEstimator:
 
 
   def fast_dtft(self, signal):    
-    Fx = fft(signal, self.M)
+    Fx = fft.fft(signal, self.M)
     Ff = fftpack.fftfreq(self.M, 1 / self.Fs)
 
     Fx = fftpack.fftshift(Fx)

@@ -54,3 +54,15 @@ class Signals:
             n += 1
 
         return x
+
+    def x_theoretical(self, ang_frequency):
+        # Generates a theoretical signal without noise
+        x = [0 for i in range(self.N)]
+        
+        n = self.n0
+        for i in range(self.N):
+            z = complex(0, self.w0 * n * self.Ts + self.phi)
+            x[i] = self.A * exp(z)
+            n += 1
+
+        return x
