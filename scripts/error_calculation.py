@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import numpy as np
+
 class ErrorCalculation:
   def __init__(self):
     pass
@@ -12,6 +14,6 @@ class ErrorCalculation:
 
     total = 0
     for i in range(list_length):
-        total += (list_lhs[i] - list_rhs[i])**2
+        total += (np.absolute(list_lhs[i] - list_rhs[i]))**2
 
     return total / list_length

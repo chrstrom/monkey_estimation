@@ -17,7 +17,7 @@ the Nelder-Mead-algorithm
 """
 
 class Optimize:
-  def __init__(self, f0=None, M=None, SNR=None):
+  def __init__(self, f0=None, phi0=None, M=None, SNR=None):
     self.N = cfg.N
     self.T = cfg.Ts
     self.n0 = cfg.n0
@@ -27,6 +27,11 @@ class Optimize:
       self.f0 = cfg.f0
     else:
       self.f0 = f0
+
+    if phi0 is None:
+      self.phi0 = cfg.phi
+    else:
+      self.phi0 = phi0
 
     if M is None or M <= 0:
       self.M = 2**10
@@ -49,13 +54,13 @@ class Optimize:
 
     # Creating signals
     x_d = sig.x_discrete()
-    x_c = sig.x_theoretical(w_k)
+    x_w = sig.x_ang_frequency(w_k)
 
     Fx_d, _ = fft_est.fast_dtft(x_d)
-    Fx_c, _ = fft_est.fast_dtft(x_c)
+    Fx_w, _ = fft_est.fast_dtft(x_w)
 
     # Tries minimizing the error with MSE
-    return error_cal.mse(Fx_d, Fx_c)
+    return error_cal.mse(Fx_d, Fx_w)
 
 
   def phase_objective_function(self, x):
@@ -64,10 +69,14 @@ class Optimize:
 
     # Creating objects 
     sig = Signals.Signals(self.SNR)
-    fft_est = estimation.FFTEstimator(self.M)
     error_cal = error_calculation.ErrorCalculation()
 
-    # Must find a way to optimize for the phase as well...
+    # Creating signals
+    x_d = sig.x_discrete()
+    x_p = sig.x_phase(phi_k)
+
+    # Tries minimizing the error with MSE
+    return error_cal.mse(x_d, x_p)
 
 
   def optimize_frequency_nelder_mead(self, x0, max_iterations):
@@ -77,18 +86,19 @@ class Optimize:
     for i in range(max_iterations):
         frequency = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
         self.frequencies.append(frequency.x[0])
-        self.mse.append(self.f0 - frequency.x[0])
+        self.mse.append((self.f0 - frequency.x[0])**2)
     
     return self.frequencies, self.mse
+
 
   def optimize_phase_nelder_mead(self, x0, max_iterations):
     self.phases = []
     self.mse = []
 
     for i in range(max_iterations):
-        phase = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
-        self.frequencies.append(frequency.x[0])
-        self.mse.append(self.f0 - frequency.x[0])
+        phase = optimize.minimize(self.phase_objective_function, x0, method="Nelder-Mead")
+        self.phases.append(phase.x[0])
+        self.mse.append((self.phi0 - phase.x[0])**2)
     
     return self.frequencies, self.mse
 
@@ -110,20 +120,30 @@ class Optimize:
 if __name__ == '__main__':
   opt = Optimize()
 
-  x0 = 1e5
+  ## Optimize the frequency and phase ##
+  f0 = cfg.f0
+  phi0 = cfg.phi
   max_iterations = 100
 
   # Get some warnings that I try to cast complex to real, which discrads imaginary value
-  frequencies, mse = opt.optimize_omega_nelder_mead(x0, max_iterations)
-    
+  frequencies, mse_freq = opt.optimize_frequency_nelder_mead(f0, max_iterations)
+  phases, mse_phase = opt.optimize_phase_nelder_mead(phi0, max_iterations)
+
+
   mean_frequency = statistics.mean(frequencies)
-  mean_mse = statistics.mean(mse)
+  mean_mse_freq = statistics.mean(mse_freq) # Somehow this is negative...
+  mean_phase = statistics.mean(phases)
+  mean_mse_phase = statistics.mean(mse_phase)
   
-  mse_variance = statistics.variance(mse, mean_mse)
+  mse_freq_variance = statistics.variance(mse_freq, mean_mse_freq)
+  mse_phase_variance = statistics.variance(mse_phase, mean_mse_phase)
 
+  print("Last optimized frequency:", frequencies[-1])
   print("Average optimized frequency:", mean_frequency)
-  print("Average optimized mse:", mean_mse)
-  print("Average optimized mse variance:", mse_variance)
+  print("Average optimized mse:", mean_mse_freq)
+  print("Average optimized mse variance:", mse_freq_variance)
 
-  # Optimize for the phase as well...
-
+  print("Last optimized phase:", phases[-1])
+  print("Average optimized phase:", mean_phase)
+  print("Average optimized mse:", mean_mse_phase)
+  print("Average optimized mse variance:", mse_phase_variance)
