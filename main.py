@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime as dt
 
 from scripts import signals as sig
 from scripts import fft_estimator
@@ -9,13 +10,14 @@ from scripts import utility
 from scripts import crlb
 from scripts import cfg
 
-SNR_dBs = [-10, 0, 10, 20]#, 30, 40, 50, 60]
+SNR_dBs = [-10, 0, 10, 20, 30, 40, 50, 60]
 FFT_Ks = [10, 12, 14, 16, 18, 20] # Commented out for performance boost when testing
 
 n = len(SNR_dBs)
 m = len(FFT_Ks)
 N = 100 # Amount of samples to generate when estimating variance
 
+total_time_begin = dt.now()
 for i in range(m):
     K = FFT_Ks[i]
     M = 2**K
@@ -27,6 +29,7 @@ for i in range(m):
         phi_estimates = np.zeros(N)
 
         status_bar_progress = 0
+        run_time_begin = dt.now()
         for k in range(N):
             x_d = sig.generate_signal(SNR_dB)
 
@@ -46,14 +49,20 @@ for i in range(m):
         crlb_w = crlb.omega(SNR_dB)
         crlb_phi = crlb.phi(SNR_dB)
 
+        run_time_end = dt.now()
         print("")
+        utility.print_execution_time(run_time_begin, run_time_end)
         if var_w < crlb_w:
             print("Variance for omega lower than CRLB!")
 
         if var_phi < crlb_phi:
             print("Variance for phi lower than CRLB!")
             
+
         print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dB, K, cfg.w0, cfg.phi))
         print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
         print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
         print("")
+
+total_time_end = dt.now()
+utility.print_execution_time(total_time_begin, total_time_end)

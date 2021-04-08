@@ -11,3 +11,7 @@ def print_status_bar(i, progress, N, size=50):
     sys.stdout.flush()
 
     return progress
+
+def print_execution_time(begin, end):
+    total_calculation_time = float((end - begin).total_seconds())
+    print("Calculation time: %f seconds" % total_calculation_time)
