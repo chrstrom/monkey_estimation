@@ -2,6 +2,7 @@
 
 # A single file containing everything needed for the estimation
 import numpy as np
+import sys
 import matplotlib.pyplot as plt
 
 def generate_crlb(sigma_squared):
@@ -64,6 +65,16 @@ def plot(x_d, Fw, i):
     plt.plot(Ff, Fw)
     plt.title("F-transforms of all generated signals")
 
+def print_status_bar(i, progress):
+    if i % (num_of_runs/status_bar_length) == 0:
+        progress += 1
+
+    sys.stdout.write('\r')
+    sys.stdout.write("Status: [" + "="*progress + " "*(status_bar_length-progress) +  "]")
+    sys.stdout.flush()
+
+    return progress
+
 # Constants
 Fs = 10**6
 T = 1.0/Fs
@@ -81,21 +92,24 @@ Q = N*(N-1)*(2*N-1)/6.0
 
 n0 = -P/N
 
+status_bar_length = 50
+num_of_runs = 500
+
 # Generate multiple samples to calculate variance
-SNR_dB = 10.0
+SNR_dB = 30.0
 SNR = 10**(SNR_dB/10.0)
 
-K = 10
+K = 16
 M = 2**K
 
 sigma_squared = A**2 / (2*SNR)
 
-NUM = 100
-w_estimates = np.empty(NUM)
-phi_estimates = np.empty(NUM)
-do_plot = True
+w_estimates = np.empty(num_of_runs)
+phi_estimates = np.empty(num_of_runs)
 
-for i in range(NUM):
+status_bar_progress = 0
+do_plot = False
+for i in range(num_of_runs):
 
     x_d = generate_signal(np.sqrt(sigma_squared))
     w_hat, phi_hat, Fw = fft_estimator(x_d, M)
@@ -105,8 +119,8 @@ for i in range(NUM):
 
     if do_plot:
         plot(x_d, Fw, i)
-    
-plt.show()
+
+    status_bar_progress = print_status_bar(i, status_bar_progress)
 
 mean_w = np.mean(w_estimates)
 mean_phi = np.mean(phi_estimates)
@@ -116,6 +130,15 @@ var_phi = np.var(phi_estimates)
 
 crlb_w, crlb_phi = generate_crlb(sigma_squared)
 
+print("")
+if var_w < crlb_w:
+    print("Variance for omega lower than CRLB!")
+
+if var_phi < crlb_phi:
+    print("Variance for phi lower than CRLB!")
+
 print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dB, K, w0, phi))
 print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
 print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
+
+plt.show()
