@@ -10,10 +10,10 @@ def generate_crlb(sigma_squared):
 
     return crlb_w, crlb_phi
 
-def generate_signal(sigma_squared):
+def generate_signal(sigma):
     # Noise generation
-    wr = np.random.normal(0, sigma_squared, N)
-    wi = np.random.normal(0, sigma_squared, N)
+    wr = np.random.normal(0, sigma, N)
+    wi = np.random.normal(0, sigma, N)
     w = wr + 1j*wi
 
     # Pure signal generation
@@ -23,16 +23,46 @@ def generate_signal(sigma_squared):
 
     return x + w
 
+def F(x_d, w):
+    Fw0 = 0
+    for n in range(N):
+        Fw0 += x_d[n]*np.exp(-1j*w*n*T) # Eq. (6)
+    Fw0 /= N
+
+    return Fw0
+
 def fft_estimator(x_d, M):
     Fw = np.fft.fft(x_d, M)
-
     m_star = np.argmax(np.absolute(Fw))
+    
+    w_hat = 2*np.pi*m_star / (M*T)   # Eq. (8)
+    phi_hat = np.angle(np.exp(-1j*w_hat*n0*T)*F(x_d, w_hat))   # Eq. (7)
 
-    w_hat = 2*np.pi*m_star / (M*T)                          # Eq. (8)
-    phi_hat = np.angle(np.exp(-1j*w_hat*n0*T)*Fw[m_star])   # Eq. (7)
+    return w_hat, phi_hat, Fw
 
-    return w_hat, phi_hat
+def plot(x_d, Fw, i):
+    Fw = np.fft.fftshift(Fw)
+    Fw = np.absolute(Fw)
 
+    Ff = np.fft.fftfreq(M, 1.0/Fs)
+    Ff = np.fft.fftshift(Ff)
+
+    if i == 0:
+        plt.figure(1)
+        plt.plot(np.arange(len(x_d)), np.real(x_d))
+        plt.title("First generated signal with GWN, real values")
+
+        plt.figure(2)
+        plt.plot(np.arange(len(x_d)), np.imag(x_d))
+        plt.title("First generated signal with GWN, imag values")
+
+        plt.figure(3)
+        plt.plot(Ff, Fw)
+        plt.title("Abs. of F-transform of first generated signal")
+
+    plt.figure(4)
+    plt.plot(Ff, Fw)
+    plt.title("F-transforms of all generated signals")
 
 # Constants
 Fs = 10**6
@@ -52,7 +82,7 @@ Q = N*(N-1)*(2*N-1)/6.0
 n0 = -P/N
 
 # Generate multiple samples to calculate variance
-SNR_dB = -10.0
+SNR_dB = 10.0
 SNR = 10**(SNR_dB/10.0)
 
 K = 10
@@ -63,14 +93,21 @@ sigma_squared = A**2 / (2*SNR)
 NUM = 100
 w_estimates = np.empty(NUM)
 phi_estimates = np.empty(NUM)
+do_plot = True
+
 for i in range(NUM):
 
-    x_d = generate_signal(sigma_squared)
-    w_hat, phi_hat = fft_estimator(x_d, M)
+    x_d = generate_signal(np.sqrt(sigma_squared))
+    w_hat, phi_hat, Fw = fft_estimator(x_d, M)
 
     w_estimates[i] = w_hat
     phi_estimates[i] = phi_hat
+
+    if do_plot:
+        plot(x_d, Fw, i)
     
+plt.show()
+
 mean_w = np.mean(w_estimates)
 mean_phi = np.mean(phi_estimates)
 
@@ -79,6 +116,6 @@ var_phi = np.var(phi_estimates)
 
 crlb_w, crlb_phi = generate_crlb(sigma_squared)
 
-print("SNR [dB]: {}, M: 2^{}".format(SNR_dB, K))
-print("OMEGA | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
-print("PHASE | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
+print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dB, K, w0, phi))
+print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
+print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
