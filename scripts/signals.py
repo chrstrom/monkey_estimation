@@ -1,56 +1,39 @@
 #!/usr/bin/env python
 
-from cmath import exp, pi
-import numpy as np
-import matplotlib.pyplot as plt
-
 import cfg
+import numpy as np
 
-def sigma_squared_from_SNR(A, SNR):
-    return A**2 / (2*float(SNR))
+def sigma_squared_from_SNR(SNR):
+    """
+    Calculate the value for sigma^2 according to the
+    definition.
+    """
+    return cfg.A**2 / (2*float(SNR)) # Float casting prevents floor division
 
-class Signals:
+def F(x_d, w):
+    """
+    Calculate F(w) according to Eq. (6) in the project
+    specifications.
+    """
+    sum = 0
+    for n in range(0, cfg.N):
+        sum += x_d[n]*np.exp(-1j*w*n*cfg.Ts)
 
-    def __init__(self, SNR_dB=None):
-        self.N   = cfg.N
-        self.Fs  = cfg.Fs
-        self.Ts  = cfg.Ts
-        self.A   = cfg.A
+    return sum / cfg.N
 
-        self.P   = cfg.P
-        self.Q   = cfg.Q
-        self.n0  = cfg.n0
+def generate_signal(sigma):
+    """
+    Generate a signal according to the problem spec.
+    which consists of a complex exponential with 
+    added noise. Note that the input argument is sigma,
+    NOT sigma^2
+    """
+    wr = np.random.normal(0, sigma, cfg.N)
+    wi = np.random.normal(0, sigma, N)
+    w = wr + 1j*wi
 
-        self.phi = cfg.phi
+    x = np.empty(N, dtype=np.complex_)
+    for n in range(N):
+        x[n] = A*np.exp(1j*(w0*(n+cfg.n0)*T + cfg.phi))
 
-        self.f0  = cfg.f0
-        self.w0  = cfg.w0
-
-        if SNR_dB is None:
-            self.SNR = cfg.SNR
-        else:
-            self.SNR = 10**(SNR_dB/10.0)
-
-        self.sigma = sigma_squared_from_SNR(self.A, self.SNR)
-
-    def F(self, w0):
-        x = self.x_discrete()
-        sum = 0
-        for n in range(0, self.N):
-            sum += x[n]*exp(-1j*w0*n*self.Ts)
-
-        return sum / self.N
-
-    def x_discrete(self):
-        # Generate the data for the sampled signal
-        x = [0 for i in range(self.N)]
-        noise_real = np.random.normal(0, pow(self.sigma, 2), self.N)
-        noise_imag = np.random.normal(0, pow(self.sigma, 2), self.N)
-
-        n = self.n0
-        for i in range(self.N):
-            z = complex(0, self.w0 * n * self.Ts + self.phi)
-            x[i] = self.A * exp(z) + complex(noise_real[i], noise_imag[i])
-            n += 1
-
-        return x
+    return x + w
