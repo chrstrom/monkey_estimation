@@ -16,7 +16,6 @@ n = len(SNR_dBs)
 m = len(FFT_Ks)
 N = 100 # Amount of samples to generate when estimating variance
 
-
 for i in range(m):
     K = FFT_Ks[i]
     M = 2**K
@@ -47,8 +46,14 @@ for i in range(m):
         crlb_w = crlb.omega(SNR_dB)
         crlb_phi = crlb.phi(SNR_dB)
 
-        print("") # Newline
+        print("")
+        if var_w < crlb_w:
+            print("Variance for omega lower than CRLB!")
+
+        if var_phi < crlb_phi:
+            print("Variance for phi lower than CRLB!")
+            
         print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dB, K, cfg.w0, cfg.phi))
         print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
         print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
-        print("") # Newline
+        print("")
