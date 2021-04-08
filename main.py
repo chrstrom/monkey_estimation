@@ -3,43 +3,52 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scripts import signals
-from scripts import estimation
+from scripts import signals as sig
+from scripts import fft_estimator
+from scripts import utility
 from scripts import crlb
-
+from scripts import cfg
 
 SNR_dBs = [-10, 0, 10, 20]#, 30, 40, 50, 60]
-FFT_Ks = [10, 12, 14]#, 16, 18, 20] # Commented out for performance boost when testing
+FFT_Ks = [10, 12, 14, 16, 18, 20] # Commented out for performance boost when testing
 
 n = len(SNR_dBs)
 m = len(FFT_Ks)
 N = 100 # Amount of samples to generate when estimating variance
 
+
 for i in range(m):
     K = FFT_Ks[i]
     M = 2**K
 
-    M_point_estimator = estimation.FFTEstimator(M)
-
     for j in range(n):
-        SNR = SNR_dBs[j]
-        sig = signals.Signals(SNR)
-        lb = crlb.CRLB(SNR)
+        SNR = sig.linear_SNR_from_dB(SNR_dBs[j])
 
-        omega_estimates = np.zeros(N)
-        phase_estimates = np.zeros(N)
+        w_estimates = np.zeros(N)
+        phi_estimates = np.zeros(N)
+
+        status_bar_progress = 0
         for k in range(N):
-            x_d = sig.x_discrete()
+            x_d = sig.generate_signal(SNR)
 
-            omega_hat, phi_hat = M_point_estimator.estimate_omega_and_phi(x_d)
+            omega_hat, phi_hat, _ = fft_estimator.estimator(x_d, M)
 
-            omega_estimates[k] = omega_hat
-            phase_estimates[k] = phi_hat
+            w_estimates[k] = omega_hat
+            phi_estimates[k] = phi_hat
 
-        var_omega = np.var(omega_estimates)
-        var_phase = np.var(phase_estimates)
+            status_bar_progress = utility.print_status_bar(k, status_bar_progress, N)
 
-        print("Samples: {}, SNR: {}, M: 2^{}, var_omega: {}, CRLB: {}".format(N, SNR, K, var_omega, lb.omega()))
-        print("Samples: {}, SNR: {}, M: 2^{}, var_phase: {}, CRLB: {}".format(N, SNR, K, var_phase, lb.phi()))
+        mean_w = np.mean(w_estimates)
+        mean_phi = np.mean(phi_estimates)
 
-    print("") # Newline
+        var_w = np.var(w_estimates)
+        var_phi = np.var(phi_estimates)
+
+        crlb_w = crlb.omega(SNR)
+        crlb_phi = crlb.phi(SNR)
+
+        print("") # Newline
+        print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dBs[j], K, cfg.w0, cfg.phi))
+        print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
+        print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
+        print("") # Newline
