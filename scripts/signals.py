@@ -29,11 +29,11 @@ def generate_signal(sigma):
     NOT sigma^2
     """
     wr = np.random.normal(0, sigma, cfg.N)
-    wi = np.random.normal(0, sigma, N)
+    wi = np.random.normal(0, sigma, cfg.N)
     w = wr + 1j*wi
 
-    x = np.empty(N, dtype=np.complex_)
-    for n in range(N):
-        x[n] = A*np.exp(1j*(w0*(n+cfg.n0)*T + cfg.phi))
+    x = np.empty(cfg.N, dtype=np.complex_)
+    for n in range(cfg.N):
+        x[n] = cfg.A*np.exp(1j*(cfg.w0*(n+cfg.n0)*cfg.Ts + cfg.phi))
 
     return x + w
