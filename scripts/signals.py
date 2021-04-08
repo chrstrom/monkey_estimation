@@ -1,5 +1,9 @@
-#!/usr/bin/env python
+import sys
+import os
 
+if os.name == 'nt':
+    sys.path[0]=os.path.dirname(os.path.realpath(__file__))
+    
 import cfg
 import numpy as np
 
