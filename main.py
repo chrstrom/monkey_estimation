@@ -22,14 +22,14 @@ for i in range(m):
     M = 2**K
 
     for j in range(n):
-        SNR = sig.linear_SNR_from_dB(SNR_dBs[j])
+        SNR_dB = SNR_dBs[j]
 
         w_estimates = np.zeros(N)
         phi_estimates = np.zeros(N)
 
         status_bar_progress = 0
         for k in range(N):
-            x_d = sig.generate_signal(SNR)
+            x_d = sig.generate_signal(SNR_dB)
 
             omega_hat, phi_hat, _ = fft_estimator.estimator(x_d, M)
 
@@ -44,11 +44,11 @@ for i in range(m):
         var_w = np.var(w_estimates)
         var_phi = np.var(phi_estimates)
 
-        crlb_w = crlb.omega(SNR)
-        crlb_phi = crlb.phi(SNR)
+        crlb_w = crlb.omega(SNR_dB)
+        crlb_phi = crlb.phi(SNR_dB)
 
         print("") # Newline
-        print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dBs[j], K, cfg.w0, cfg.phi))
+        print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dB, K, cfg.w0, cfg.phi))
         print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
         print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
         print("") # Newline

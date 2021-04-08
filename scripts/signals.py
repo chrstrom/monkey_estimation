@@ -3,14 +3,12 @@
 import cfg
 import numpy as np
 
-def linear_SNR_from_dB(SNR_dB):
-    return 10**(SNR_dB/10.0)
-
-def sigma_squared_from_SNR(SNR):
+def sigma_squared_from_SNR_dB(SNR_dB):
     """
     Calculate the value for sigma^2 according to the
     definition.
     """
+    SNR = 10**(SNR_dB/10.0)
     return cfg.A**2 / (2*float(SNR)) # Float casting prevents floor division
 
 def F(x_d, w):
@@ -24,13 +22,13 @@ def F(x_d, w):
 
     return sum / cfg.N
 
-def generate_signal(SNR):
+def generate_signal(SNR_dB):
     """
     Generate a signal according to the problem spec.
     which consists of a complex exponential with 
     added noise. Noise-to-signal ratio defined by SNR
     """
-    sigma = np.sqrt(sigma_squared_from_SNR(SNR))
+    sigma = np.sqrt(sigma_squared_from_SNR_dB(SNR_dB))
 
     wr = np.random.normal(0, sigma, cfg.N)
     wi = np.random.normal(0, sigma, cfg.N)
