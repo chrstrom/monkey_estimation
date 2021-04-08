@@ -3,13 +3,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scripts import Signals
+from scripts import signals
 from scripts import estimation
-from scripts import CRLB
+from scripts import crlb
 
-from scipy import fft, ifft, fftpack
 
-SNR_dBs = [-10, 0, 10, 20, 30, 40, 50, 60]
+SNR_dBs = [-10, 0, 10, 20]#, 30, 40, 50, 60]
 FFT_Ks = [10, 12, 14]#, 16, 18, 20] # Commented out for performance boost when testing
 
 n = len(SNR_dBs)
@@ -24,8 +23,8 @@ for i in range(m):
 
     for j in range(n):
         SNR = SNR_dBs[j]
-        sig = Signals.Signals(SNR)
-        crlb = CRLB.CRLB(SNR)
+        sig = signals.Signals(SNR)
+        lb = crlb.CRLB(SNR)
 
         omega_estimates = np.zeros(N)
         phase_estimates = np.zeros(N)
@@ -40,7 +39,7 @@ for i in range(m):
         var_omega = np.var(omega_estimates)
         var_phase = np.var(phase_estimates)
 
-        print("Samples: {}, SNR: {}, M: 2^{}, var_omega: {}, CRLB: {}".format(N, SNR, K, var_omega, crlb.omega()))
-        print("Samples: {}, SNR: {}, M: 2^{}, var_phase: {}, CRLB: {}".format(N, SNR, K, var_phase, crlb.phi()))
+        print("Samples: {}, SNR: {}, M: 2^{}, var_omega: {}, CRLB: {}".format(N, SNR, K, var_omega, lb.omega()))
+        print("Samples: {}, SNR: {}, M: 2^{}, var_phase: {}, CRLB: {}".format(N, SNR, K, var_phase, lb.phi()))
 
     print("") # Newline

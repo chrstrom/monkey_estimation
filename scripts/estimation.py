@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import Signals
+import signals
 import cfg
 from scipy import fft, fftpack
 

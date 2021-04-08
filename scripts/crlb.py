@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import cfg
-import Signals as sig
+import signals as sig
 
 class CRLB:
 
