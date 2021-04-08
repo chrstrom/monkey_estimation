@@ -3,6 +3,9 @@
 import cfg
 import numpy as np
 
+def linear_SNR_from_dB(SNR_dB):
+    return 10**(SNR_dB/10.0)
+
 def sigma_squared_from_SNR(SNR):
     """
     Calculate the value for sigma^2 according to the
@@ -21,13 +24,14 @@ def F(x_d, w):
 
     return sum / cfg.N
 
-def generate_signal(sigma):
+def generate_signal(SNR):
     """
     Generate a signal according to the problem spec.
     which consists of a complex exponential with 
-    added noise. Note that the input argument is sigma,
-    NOT sigma^2
+    added noise. Noise-to-signal ratio defined by SNR
     """
+    sigma = np.sqrt(sigma_squared_from_SNR(SNR))
+
     wr = np.random.normal(0, sigma, cfg.N)
     wi = np.random.normal(0, sigma, cfg.N)
     w = wr + 1j*wi
