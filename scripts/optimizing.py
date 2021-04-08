@@ -9,6 +9,7 @@ import estimation
 import error_calculation
 
 from scipy import optimize, fft, fftpack
+from math import pi
 
 """
 In this file, we should try to optimize the performance of the estimate
@@ -44,8 +45,8 @@ class Optimize:
       self.SNR = SNR
 
   def frequency_objective_function(self, x):
-    # Estimate number k for angular frequency from NM-algorithm 
-    w_k = x[0]
+    # Estimate number k for frequency from NM-algorithm 
+    f_k = x[0]
 
     # Creating objects 
     sig = Signals.Signals(self.SNR)
@@ -54,13 +55,13 @@ class Optimize:
 
     # Creating signals
     x_d = sig.x_discrete()
-    x_w = sig.x_ang_frequency(w_k)
+    x_f = sig.x_frequency(f_k)
 
     Fx_d, _ = fft_est.fast_dtft(x_d)
-    Fx_w, _ = fft_est.fast_dtft(x_w)
+    Fx_f, _ = fft_est.fast_dtft(x_f)
 
     # Tries minimizing the error with MSE
-    return error_cal.mse(Fx_d, Fx_w)
+    return error_cal.mse(np.absolute(Fx_d), np.absolute(Fx_f))
 
 
   def phase_objective_function(self, x):
@@ -100,7 +101,7 @@ class Optimize:
         self.phases.append(phase.x[0])
         self.mse.append((self.phi0 - phase.x[0])**2)
     
-    return self.frequencies, self.mse
+    return self.phases, self.mse
 
   # Doesn't quite work
   # def plot_mse(self, min_frequency, max_frequency, frequency_step):
@@ -121,29 +122,28 @@ if __name__ == '__main__':
   opt = Optimize()
 
   ## Optimize the frequency and phase ##
-  f0 = cfg.f0
-  phi0 = cfg.phi
+  f0 = 1.5e5
+  phi0 = pi / 2.0
   max_iterations = 100
 
-  # Get some warnings that I try to cast complex to real, which discrads imaginary value
   frequencies, mse_freq = opt.optimize_frequency_nelder_mead(f0, max_iterations)
   phases, mse_phase = opt.optimize_phase_nelder_mead(phi0, max_iterations)
 
 
   mean_frequency = statistics.mean(frequencies)
-  mean_mse_freq = statistics.mean(mse_freq) # Somehow this is negative...
+  # mean_mse_freq = statistics.mean(mse_freq) 
   mean_phase = statistics.mean(phases)
-  mean_mse_phase = statistics.mean(mse_phase)
+  # mean_mse_phase = statistics.mean(mse_phase)
   
-  mse_freq_variance = statistics.variance(mse_freq, mean_mse_freq)
-  mse_phase_variance = statistics.variance(mse_phase, mean_mse_phase)
+  # mse_freq_variance = statistics.variance(mse_freq, mean_mse_freq)
+  # mse_phase_variance = statistics.variance(mse_phase, mean_mse_phase)
 
   print("Last optimized frequency:", frequencies[-1])
   print("Average optimized frequency:", mean_frequency)
-  print("Average optimized mse:", mean_mse_freq)
-  print("Average optimized mse variance:", mse_freq_variance)
+  # print("Average optimized mse:", mean_mse_freq)
+  # print("Average optimized mse variance:", mse_freq_variance)
 
   print("Last optimized phase:", phases[-1])
   print("Average optimized phase:", mean_phase)
-  print("Average optimized mse:", mean_mse_phase)
-  print("Average optimized mse variance:", mse_phase_variance)
+  # print("Average optimized mse:", mean_mse_phase)
+  # print("Average optimized mse variance:", mse_phase_variance)
