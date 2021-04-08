@@ -3,40 +3,20 @@
 import cfg
 import signals as sig
 
-class CRLB:
 
-    def __init__(self, SNR_dB):
-        self.N = cfg.N
-        self.T = cfg.Ts
-        self.A = cfg.A
-        self.n0 = cfg.n0
+def omega(SNR):
 
-        self.P = cfg.P
-        self.Q = cfg.Q
-        
-        self.SNR = 10**(SNR_dB/10.0)
+    sigma_squared = sig.sigma_squared_from_SNR(SNR)
 
-    def omega(self):
+    numerator = 12*sigma_squared
+    denominator = cfg.A**2 * cfg.Ts**2 * cfg.N*(cfg.N**2 - 1)
 
-        sigma_squared = sig.sigma_squared_from_SNR(self.A, self.SNR)
+    return numerator / denominator
 
-        numerator = 12*sigma_squared
-        denominator = self.A**2 * self.T**2 * self.N*(self.N**2 - 1)
+def phi(SNR):
+    sigma_squared = sig.sigma_squared_from_SNR(SNR)
 
-        return numerator / denominator
+    numerator = 12*sigma_squared*(cfg.n0**2 * cfg.N + 2*cfg.n0*cfg.P + cfg.Q)
+    denominator = cfg.A**2 * cfg.N**2 * (cfg.N**2 - 1)
 
-    def phi(self):
-        sigma_squared = sig.sigma_squared_from_SNR(self.A, self.SNR)
-
-        numerator = 12*sigma_squared*(self.n0**2 * self.N + 2*self.n0*self.P + self.Q)
-        denominator = self.A**2 * self.N**2 * (self.N**2 - 1)
-
-        return numerator / denominator
-
-
-
-if __name__ == '__main__':
-    crlb = CRLB()
-
-    print(crlb.omega())
-    print(crlb.phi())
+    return numerator / denominator
