@@ -8,8 +8,7 @@ import signals
 import fft_estimator
 import error_calculation
 
-from scipy import optimize, fft, fftpack
-from math import pi
+from scipy import optimize
 
 """
 In this file, we should try to optimize the performance of the estimate
@@ -18,11 +17,13 @@ the Nelder-Mead-algorithm
 """
 
 class Optimize:
-  def __init__(self, f0=None, phi0=None, M=None, SNR=None):
+  def __init__(self, SNR, f0=None, phi0=None, M=None):
     self.N = cfg.N
     self.T = cfg.Ts
     self.n0 = cfg.n0
     self.Fs = cfg.Fs
+  
+    self.SNR = SNR
 
     if f0 is None:
       self.f0 = cfg.f0
@@ -39,17 +40,10 @@ class Optimize:
     else:
       self.M = M
 
-    if SNR is None:
-      self.SNR = cfg.SNR
-    else:
-      self.SNR = SNR
 
   def frequency_objective_function(self, x):
     # Estimate number k for frequency from NM-algorithm 
     f_k = x[0]
-
-    # Creating objects 
-    error_cal = error_calculation.ErrorCalculation()
 
     # Creating signals
     x_d = signals.generate_signal(self.SNR)
@@ -59,7 +53,7 @@ class Optimize:
     Fx_f, _ = fft_estimator.M_point_fft(x_f, self.M)
 
     # Tries minimizing the error with MSE
-    return error_cal.mse(np.absolute(Fx_d), np.absolute(Fx_f))
+    return error_calculation.mse(np.absolute(Fx_d), np.absolute(Fx_f))
 
 
   def phase_objective_function(self, x):
@@ -67,14 +61,14 @@ class Optimize:
     phi_k = x[0]
 
     # Creating objects 
-    error_cal = error_calculation.ErrorCalculation()
+
 
     # Creating signals
     x_d = signals.generate_signal(self.SNR)
     x_p = signals.x_phase(phi_k)
 
     # Tries minimizing the error with MSE
-    return error_cal.mse(x_d, x_p)
+    return error_calculation.mse(x_d, x_p)
 
 
   def optimize_frequency_nelder_mead(self, x0, max_iterations):
@@ -116,11 +110,11 @@ class Optimize:
 
 
 if __name__ == '__main__':
-  opt = Optimize()
+  opt = Optimize(10)
 
   ## Optimize the frequency and phase ##
   f0 = 1.5e5
-  phi0 = pi / 2.0
+  phi0 = np.pi / 2.0
   max_iterations = 100
 
   frequencies, mse_freq = opt.optimize_frequency_nelder_mead(f0, max_iterations)
