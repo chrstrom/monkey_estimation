@@ -39,10 +39,21 @@ def estimator(x_d, M):
     as the FFT of the input signal, for data analysis
     purposes.
     """
-    Fw = np.fft.fft(x_d, M)
+    Fw, Ff = M_point_fft(x_d, M)
+
     m_star = calculate_m_star(Fw)
 
     w_hat = calculate_w_hat(m_star, M)
     phi_hat = calculate_phi_hat(x_d, w_hat)
 
-    return w_hat, phi_hat, Fw
+
+    return w_hat, phi_hat, Fw, Ff
+
+def M_point_fft(x_d, M):
+    Fw = np.fft.fft(x_d, M)
+    Ff = np.fft.fftfreq(M, 1 / cfg.Fs)
+
+    Fw = np.fft.fftshift(Fw)
+    Ff = np.fft.fftshift(Ff)
+
+    return Fw, Ff

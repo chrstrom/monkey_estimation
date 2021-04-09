@@ -43,3 +43,29 @@ def generate_signal(SNR_dB):
         x[n] = cfg.A*np.exp(1j*(cfg.w0*(n+cfg.n0)*cfg.Ts + cfg.phi))
 
     return x + w
+
+
+def x_frequency(frequency):
+    # Generates a theoretical signal for a given frequency
+    x = [0 for i in range(cfg.N)]
+    
+    n = cfg.n0
+    for i in range(cfg.N):
+        z = complex(0, 2 * np.pi * frequency * n * cfg.Ts + cfg.phi)
+        x[i] = cfg.A * np.exp(z)
+        n += 1
+
+    return x
+
+
+def x_phase(phase):
+    # Generates a theoretical signal without noise
+    x = [0 for i in range(cfg.N)]
+    
+    n = cfg.n0
+    for i in range(cfg.N):
+        z = complex(0, cfg.w0 * n * cfg.Ts + phase)
+        x[i] = cfg.A * np.exp(z)
+        n += 1
+
+    return x

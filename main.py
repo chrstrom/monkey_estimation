@@ -33,7 +33,7 @@ for i in range(m):
         for k in range(N):
             x_d = sig.generate_signal(SNR_dB)
 
-            omega_hat, phi_hat, _ = fft_estimator.estimator(x_d, M)
+            omega_hat, phi_hat, _, _ = fft_estimator.estimator(x_d, M)
 
             w_estimates[k] = omega_hat
             phi_estimates[k] = phi_hat
