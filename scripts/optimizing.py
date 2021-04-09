@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import cfg
-import statistics
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -128,13 +127,13 @@ if __name__ == '__main__':
   phases, mse_phase = opt.optimize_phase_nelder_mead(phi0, max_iterations)
 
 
-  mean_frequency = statistics.mean(frequencies)
-  # mean_mse_freq = statistics.mean(mse_freq) 
-  mean_phase = statistics.mean(phases)
-  # mean_mse_phase = statistics.mean(mse_phase)
+  mean_frequency = np.mean(frequencies)
+  # mean_mse_freq = np.mean(mse_freq) 
+  mean_phase = np.mean(phases)
+  # mean_mse_phase = np.mean(mse_phase)
   
-  # mse_freq_variance = statistics.variance(mse_freq, mean_mse_freq)
-  # mse_phase_variance = statistics.variance(mse_phase, mean_mse_phase)
+  # mse_freq_variance = np.variance(mse_freq, mean_mse_freq)
+  # mse_phase_variance = np.variance(mse_phase, mean_mse_phase)
 
   print("Last optimized frequency:", frequencies[-1])
   print("Average optimized frequency:", mean_frequency)
