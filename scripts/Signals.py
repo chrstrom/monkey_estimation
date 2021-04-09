@@ -44,13 +44,38 @@ class Signals:
     def x_discrete(self):
         # Generate the data for the sampled signal
         x = [0 for i in range(self.N)]
-        noise_real = np.random.normal(0, pow(self.sigma, 2), self.N)
-        noise_imag = np.random.normal(0, pow(self.sigma, 2), self.N)
+        noise_real = np.random.normal(0, self.sigma, self.N)
+        noise_imag = np.random.normal(0, self.sigma, self.N)
 
         n = self.n0
         for i in range(self.N):
             z = complex(0, self.w0 * n * self.Ts + self.phi)
             x[i] = self.A * exp(z) + complex(noise_real[i], noise_imag[i])
+            n += 1
+
+        return x
+
+    def x_frequency(self, frequency):
+        # Generates a theoretical signal for a given frequency
+        x = [0 for i in range(self.N)]
+        
+        n = self.n0
+        for i in range(self.N):
+            z = complex(0, 2 * pi * frequency * n * self.Ts + self.phi)
+            x[i] = self.A * exp(z)
+            n += 1
+
+        return x
+
+
+    def x_phase(self, phase):
+        # Generates a theoretical signal without noise
+        x = [0 for i in range(self.N)]
+        
+        n = self.n0
+        for i in range(self.N):
+            z = complex(0, self.w0 * n * self.Ts + phase)
+            x[i] = self.A * exp(z)
             n += 1
 
         return x

@@ -2,8 +2,8 @@
 
 from cmath import pi
 
-
 N = 513
+M = 2**10
 
 Fs = 1e6
 Ts = 1.0 / Fs
@@ -11,6 +11,8 @@ Ts = 1.0 / Fs
 A = 1
 phi = pi / 8.0
 
+SNR_dB = 10.0              # [-10, 60]
+SNR = 10**(SNR_dB/10.0)
 
 f0 = 1e5
 w0 = 2 * pi * f0 
