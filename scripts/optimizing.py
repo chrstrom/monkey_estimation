@@ -8,6 +8,7 @@ import signals
 import fft_estimator
 import error_calculation
 
+from datetime import datetime as dt
 from scipy import optimize
 
 """
@@ -117,6 +118,7 @@ if __name__ == '__main__':
   phi0 = np.pi / 2.0
   max_iterations = 100
 
+  begin = dt.now()
   frequencies, mse_freq = opt.optimize_frequency_nelder_mead(f0, max_iterations)
   phases, mse_phase = opt.optimize_phase_nelder_mead(phi0, max_iterations)
 
@@ -128,6 +130,8 @@ if __name__ == '__main__':
   
   # mse_freq_variance = np.variance(mse_freq, mean_mse_freq)
   # mse_phase_variance = np.variance(mse_phase, mean_mse_phase)
+  end = dt.now()
+  print("Calculation time: %f seconds" % float((end - begin).total_seconds()))
 
   print("Last optimized frequency:", frequencies[-1])
   print("Average optimized frequency:", mean_frequency)
