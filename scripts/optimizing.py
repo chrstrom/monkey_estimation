@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 import signals
 import fft_estimator
-import error_calculation
 
 from datetime import datetime as dt
 from scipy import optimize
@@ -42,6 +41,11 @@ class Optimize:
       self.M = M
 
 
+  def mse(self, list_lhs, list_rhs):
+    assert(len(list_lhs) == len(list_rhs))
+    return np.square(np.absolute(list_lhs - list_rhs)).mean()
+    
+
   def frequency_objective_function(self, x):
     # Estimate number k for frequency from NM-algorithm 
     f_k = x[0]
@@ -54,46 +58,43 @@ class Optimize:
     Fx_f, _ = fft_estimator.M_point_fft(x_f, self.M)
 
     # Tries minimizing the error with MSE
-    return error_calculation.mse(np.absolute(Fx_d), np.absolute(Fx_f))
+    return self.mse(np.absolute(Fx_d), np.absolute(Fx_f))
 
 
   def phase_objective_function(self, x):
     # Estimate number k for the phase
     phi_k = x[0]
 
-    # Creating objects 
-
-
     # Creating signals
     x_d = signals.generate_signal(self.SNR)
     x_p = signals.x_phase(phi_k)
 
     # Tries minimizing the error with MSE
-    return error_calculation.mse(x_d, x_p)
+    return self.mse(x_d, x_p)
 
 
   def optimize_frequency_nelder_mead(self, x0, max_iterations):
-    self.frequencies = []
-    self.mse = []
+    frequencies = np.zeros(max_iterations)
+    mse = np.zeros(max_iterations)
 
     for i in range(max_iterations):
         frequency = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
-        self.frequencies.append(frequency.x[0])
-        self.mse.append((self.f0 - frequency.x[0])**2)
+        frequencies[i] = frequency.x[0]
+        mse[i] = (self.f0 - frequency.x[0])**2
     
-    return self.frequencies, self.mse
+    return frequencies, mse
 
 
   def optimize_phase_nelder_mead(self, x0, max_iterations):
-    self.phases = []
-    self.mse = []
+    phases = np.zeros(max_iterations)
+    mse = np.zeros(max_iterations)
 
     for i in range(max_iterations):
         phase = optimize.minimize(self.phase_objective_function, x0, method="Nelder-Mead")
-        self.phases.append(phase.x[0])
-        self.mse.append((self.phi0 - phase.x[0])**2)
+        phases[i] = phase.x[0]
+        mse[i] = (self.phi0 - phase.x[0])**2
     
-    return self.phases, self.mse
+    return phases, mse
 
   # Doesn't quite work
   # def plot_mse(self, min_frequency, max_frequency, frequency_step):
@@ -116,7 +117,7 @@ if __name__ == '__main__':
   ## Optimize the frequency and phase ##
   f0 = 1.5e5
   phi0 = np.pi / 2.0
-  max_iterations = 100
+  max_iterations = 10
 
   begin = dt.now()
   frequencies, mse_freq = opt.optimize_frequency_nelder_mead(f0, max_iterations)
