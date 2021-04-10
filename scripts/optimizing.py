@@ -117,7 +117,7 @@ if __name__ == '__main__':
   ## Optimize the frequency and phase ##
   f0 = 1.5e5
   phi0 = np.pi / 2.0
-  max_iterations = 10
+  max_iterations = 100
 
   begin = dt.now()
   frequencies, mse_freq = opt.optimize_frequency_nelder_mead(f0, max_iterations)
