@@ -26,7 +26,7 @@ def F(x_d, w):
 
     return sum / cfg.N
 
-def generate_signal(SNR_dB):
+def x_discrete(SNR_dB):
     """
     Generate a signal according to the problem spec.
     which consists of a complex exponential with 

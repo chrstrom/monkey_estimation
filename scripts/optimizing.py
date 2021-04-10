@@ -17,13 +17,13 @@ the Nelder-Mead-algorithm
 """
 
 class Optimize:
-  def __init__(self, SNR, f0=None, phi0=None, M=None):
+  def __init__(self, SNR_dB, f0=None, phi0=None, M=None):
     self.N = cfg.N
     self.T = cfg.Ts
     self.n0 = cfg.n0
     self.Fs = cfg.Fs
   
-    self.SNR = SNR
+    self.SNR_dB = SNR_dB
 
     if f0 is None:
       self.f0 = cfg.f0
@@ -51,7 +51,7 @@ class Optimize:
     f_k = x[0]
 
     # Creating signals
-    x_d = signals.generate_signal(self.SNR)
+    x_d = signals.x_discrete(self.SNR_dB)
     x_f = signals.x_frequency(f_k)
 
     Fx_d, _ = fft_estimator.M_point_fft(x_d, self.M)
@@ -66,7 +66,7 @@ class Optimize:
     phi_k = x[0]
 
     # Creating signals
-    x_d = signals.generate_signal(self.SNR)
+    x_d = signals.x_discrete(self.SNR_dB)
     x_p = signals.x_phase(phi_k)
 
     # Tries minimizing the error with MSE
@@ -112,7 +112,7 @@ class Optimize:
 
 
 if __name__ == '__main__':
-  opt = Optimize(10)
+  opt = Optimize(SNR_dB=10)
 
   ## Optimize the frequency and phase ##
   f0 = 1.5e5
