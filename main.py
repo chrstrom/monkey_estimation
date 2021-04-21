@@ -48,7 +48,7 @@ with open(filename, 'ab') as file:
 
                 status_bar_progress = utility.print_status_bar(k, status_bar_progress, N)
 
-            mean_w = np.mean(w_estimates)
+            mean_w = np.mean(w_estimates) / m
             mean_phi = np.mean(phi_estimates)
 
             var_w = np.var(w_estimates)
