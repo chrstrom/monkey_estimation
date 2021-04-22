@@ -23,7 +23,6 @@ mean_phi = np.empty(N*M)
 w_estimate_valid = np.empty(N*M)
 phi_estimate_valid = np.empty(N*M)
 
-
 # format: SNR_dB, K, crlb_w, var_w, w_estimate_valid, crlb_phi, var_phi, phi_estimate_valid, mean_w, mean_phi
 with open('./data/run_2_N_30000.csv') as csvfile:
 
@@ -52,37 +51,40 @@ N_COLS = 2
 
 w_fig, ax = plt.subplots(N_ROWS, N_COLS)
 plt.figure(w_fig.number)
-plt.title("Variance for the omega estimate for varying FFT length")
+#plt.title("Variance for the omega estimate for varying FFT length")
 plt.tight_layout()
 for i in range(N_ROWS):
     for j in range(N_COLS):
         n = range(N*(2*i+j), N*(2*i+j+1))
-        ax[i][j].semilogy(SNRs, crlb_w[n], 'k.:')
-        ax[i][j].semilogy(SNRs, var_w[n], 'r.-')
-        ax[i][j].set_title("FFT length = 2^" + str(4*i + 2*j + 10))
-        ax[i][j].set_xlabel("SNR")
-        ax[i][j].set_xlabel("Variance")
-        ax[i][j].legend(['CRLB', 'Estimator'])
+        axis = ax[i][j]
+        axis.semilogy(SNRs, crlb_w[n], 'k.:')
+        axis.semilogy(SNRs, var_w[n], 'r.-')
+        axis.set_title("FFT length = 2^" + str(4*i + 2*j + 10))
+        axis.set_xlabel("SNR")
+        axis.set_ylabel("Variance")
+        axis.set_ylim(0.01)
+        axis.legend(['CRLB', 'Estimator'])
 
 
 phi_fig, ax = plt.subplots(N_ROWS, N_COLS)
 plt.figure(phi_fig.number)
-plt.title("Variance for the phi estimate for varying FFT length")
+#plt.title("Variance for the phi estimate for varying FFT length")
 plt.tight_layout()
 for i in range(N_ROWS):
     for j in range(N_COLS):
         n = range(N*(2*i+j), N*(2*i+j+1))
-        ax[i][j].semilogy(SNRs, crlb_phi[n], 'k.:')
-        ax[i][j].semilogy(SNRs, var_phi[n], 'r.-')
-        ax[i][j].set_title("FFT length = 2^" + str(4*i + 2*j + 10))
-        ax[i][j].set_xlabel("SNR")
-        ax[i][j].set_xlabel("Variance")
-        ax[i][j].legend(['CRLB', 'Estimator'])
+        axis = ax[i][j]
+        axis.semilogy(SNRs, crlb_phi[n], 'k.:')
+        axis.semilogy(SNRs, var_phi[n], 'r.-')
+        axis.set_title("FFT length = 2^" + str(4*i + 2*j + 10))
+        axis.set_xlabel("SNR")
+        axis.set_ylabel("Variance")
+        axis.legend(['CRLB', 'Estimator'])
 
 
 plt.figure(3)
 #plt.title("Difference in the mean omega from one SNR value to the next, for varying FFT length")
-plt.title("Mean for the omega estimate for varying FFT length and SNRs")
+#plt.title("Mean for the omega estimate for varying FFT length and SNRs")
 plt.plot([-10, 60], [cfg.w0, cfg.w0], 'k')
 for i in range(M):
     n = range(N*i, N*(i+1))
@@ -94,9 +96,8 @@ plt.xlabel("SNR")
 plt.ylabel("Mean")
 
 
-
 plt.figure(4)
-plt.title("Mean for the phi estimate for varying FFT length and SNRs")
+#plt.title("Mean for the phi estimate for varying FFT length and SNRs")
 plt.plot([-10, 60], [cfg.phi, cfg.phi], 'k')
 for i in range(M):
     n = range(N*i, N*(i+1))
