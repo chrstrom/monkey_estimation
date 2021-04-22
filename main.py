@@ -74,10 +74,10 @@ with open(filename, 'ab') as file:
 
             writer.writerow([SNR_dB, K, crlb_w, var_w, w_estimate_valid, crlb_phi, var_phi, phi_estimate_valid, mean_w, mean_phi])
 
-            # print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dB, K, cfg.w0, cfg.phi))
-            # print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
-            # print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
-            # print("")
+            print("CONFIG | SNR [dB]: {}, M: 2^{}, true omega: {}, true phase: {}".format(SNR_dB, K, cfg.w0, cfg.phi))
+            print("OMEGA  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_w, var_w, crlb_w))
+            print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
+            print("")
 
     total_time_end = dt.now()
     utility.print_execution_time(total_time_begin, total_time_end)
