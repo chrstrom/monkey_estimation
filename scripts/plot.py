@@ -25,7 +25,7 @@ phi_estimate_valid = np.empty(N*M)
 
 
 # format: SNR_dB, K, crlb_w, var_w, w_estimate_valid, crlb_phi, var_phi, phi_estimate_valid, mean_w, mean_phi
-with open('./data/run_2_N_1000.csv') as csvfile:
+with open('./data/run_2_N_30000.csv') as csvfile:
 
     reader = csv.reader(csvfile, delimiter=' ')
 
@@ -87,7 +87,7 @@ plt.plot([-10, 60], [cfg.w0, cfg.w0], 'k')
 for i in range(M):
     n = range(N*i, N*(i+1))
     #plt.semilogy(SNRs[1:], np.abs(np.diff(mean_w[n])), '.--')
-    plt.plot(SNRs, mean_w[n]/6, '.--')
+    plt.plot(SNRs, mean_w[n], '.--')
 
 plt.legend(["True value", "2^10", "2^12", "2^14", "2^16", "2^18", "2^20"])
 plt.xlabel("SNR")
