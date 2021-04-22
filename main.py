@@ -17,7 +17,7 @@ FFT_Ks = [10, 12, 14, 16, 18, 20] # Commented out for performance boost when tes
 
 n = len(SNR_dBs)
 m = len(FFT_Ks)
-N = 30000 # Amount of samples to generate when estimating variance
+N = 100 # Amount of samples to generate when estimating variance
 
 run_number = len([name for name in os.listdir('./data') if os.path.isfile('./data/' + name)])
 filename = 'data/run_' + str(run_number) + '_N_' + str(N) + '.csv'
