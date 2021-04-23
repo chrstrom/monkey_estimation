@@ -11,7 +11,7 @@ Ts = 1.0 / Fs
 A = 1
 phi = pi / 8.0
 
-SNR_dB = 10.0              # [-10, 60]
+SNR_dB = 30.0              # [-10, 60]
 SNR = 10**(SNR_dB/10.0)
 
 f0 = 1e5
@@ -21,3 +21,5 @@ P = N * (N - 1) / 2.0
 Q = N * (N - 1) * (2 * N - 1) / 6.0
 
 n0 = int(-P / N)
+
+num_optimizations = 100
