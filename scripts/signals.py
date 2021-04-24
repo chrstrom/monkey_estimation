@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import os
 
@@ -48,7 +50,10 @@ def x_discrete(SNR_dB):
 
 
 def x_frequency(frequency):
-    # Generates a theoretical signal for a given frequency
+    """ 
+    Generates a complex-exponential signal with given frequency
+    and without noise
+    """
     x = np.empty(cfg.N, dtype=np.complex_)
     
     for n in range(cfg.N):
@@ -59,7 +64,10 @@ def x_frequency(frequency):
 
 
 def x_phase(phase):
-    # Generates a theoretical signal without noise
+    """ 
+    Generates a complex-exponential signal with given phase
+    and without noise
+    """
     x = np.empty(cfg.N, dtype=np.complex_)
 
     for n in range(cfg.N):
