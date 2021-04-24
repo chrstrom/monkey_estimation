@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 
-import cfg
-import statistics
-import numpy as np
-import matplotlib.pyplot as plt
-import Signals
-import estimation
-import error_calculation
-
 from scipy import optimize, fft, fftpack
 from math import pi
+import numpy as np
+
+import fft_estimator
+import signals
+import cfg
 
 
 class Optimize:
-  def __init__(self, f0=None, phi0=None, M=None, SNR=None):
+  def __init__(self, f0=None, phi0=None, M=None, SNR=None, num_optimizations=None):
     self.N = cfg.N
     self.T = cfg.Ts
     self.n0 = cfg.n0
     self.Fs = cfg.Fs
-    self.num_opt = cfg.num_optimizations
 
     if f0 is None:
       self.f0 = cfg.f0
@@ -39,6 +35,11 @@ class Optimize:
       self.SNR = cfg.SNR
     else:
       self.SNR = SNR
+
+    if num_optimizations is None:
+      self.num_opt = cfg.num_opt
+    else:
+      self.num_opt = num_optimizations
   
   def mse(self, list_lhs, list_rhs):
     """ 
