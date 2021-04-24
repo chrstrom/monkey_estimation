@@ -8,12 +8,13 @@ from datetime import datetime as dt
 
 from scripts import signals as sig
 from scripts import fft_estimator
+from scripts import optimizing
 from scripts import utility
 from scripts import crlb
 from scripts import cfg
 
 SNR_dBs = [-10, 0, 10, 20, 30, 40, 50, 60]
-FFT_Ks = [10, 12, 14, 16, 18, 20] # Commented out for performance boost when testing
+FFT_Ks = [10, 12, 14, 16, 18, 20]
 
 n = len(SNR_dBs)
 m = len(FFT_Ks)

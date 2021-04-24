@@ -18,3 +18,5 @@ P = N * (N - 1) / 2.0
 Q = N * (N - 1) * (2 * N - 1) / 6.0
 
 n0 = int(-P / N)
+
+num_optimizations = 100
