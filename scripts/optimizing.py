@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
-from scipy import optimize, fft, fftpack
-from math import pi
+import csv
+import matplotlib.pyplot as plt
+from collections import Counter
+
+from scipy import optimize
+from math import pi, floor
 import numpy as np
 
 import fft_estimator
@@ -60,7 +64,7 @@ class Optimize:
     """
     f_k = x[0]
 
-    x_d = signals.x_discrete(self.SNR_dB)
+    x_d = signals.x_discrete(self.SNR)
     x_f = signals.x_frequency(f_k)
 
     Fx_d, _ = fft_estimator.M_point_fft(x_d, self.M)
@@ -79,7 +83,7 @@ class Optimize:
     """
     phi_k = x[0]
 
-    x_d = signals.x_discrete(self.SNR_dB)
+    x_d = signals.x_discrete(self.SNR)
     x_p = signals.x_phase(phi_k)
 
     return self.mse(x_d, x_p)
@@ -94,14 +98,12 @@ class Optimize:
     Returns lists of optimized frequencies, and their respective MSEs
     """
     frequencies = []
-    mse = []
 
     for i in range(self.num_opt):
         results = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
         frequencies.append(results.x[0])
-        mse.append((self.f0 - results.x[0])**2)
     
-    return frequencies, mse
+    return frequencies
 
 
   def optimize_phase_nelder_mead(self, x0):
@@ -113,11 +115,72 @@ class Optimize:
     Returns lists of optimized phases, and their respective MSEs
     """
     phases = []
-    mse = []
 
     for i in range(self.num_opt):
         results = optimize.minimize(self.phase_objective_function, x0, method="Nelder-Mead")
         phases.append(results.x[0])
-        mse.append((self.phi0 - results.x[0])**2)
     
-    return phases, mse
+    return phases
+
+if __name__ == '__main__':
+  SNRs = [-10, 0, 10, 20, 30, 40, 50, 60]
+
+  f0 = 150000
+  phi0 = pi / 2.0
+
+  all_frequencies = []
+  all_phases = []
+
+  avg_frequency = []
+  avg_phase = []
+
+  var_frequency = []
+  var_phase = []
+  
+  for SNR in SNRs:
+    opt = Optimize(SNR=SNR)
+
+    frequencies = opt.optimize_frequency_nelder_mead(f0)
+    # phases = opt.optimize_phase_nelder_mead(phi0)
+
+    avg_frequency.append(np.average(frequencies))
+    var_frequency.append(np.var(frequencies))
+
+    # avg_phase.append(np.average(phases))
+    # var_phase.append(np.var(phases))
+
+    all_frequencies.append(frequencies)
+    # all_phases.append(phases)
+  
+  plt.figure(1)
+  plt.title("Scattering of frequencies for a given SNR")
+  for i in range(len(SNRs)):
+    y = all_frequencies[i]
+    x = [SNRs[i] for k in range(len(y))]
+
+    plt.scatter(x, y, color='green')
+    # plt.scatter(SNRs[i], cfg.f0, color='red')
+
+  plt.xlabel("SNR")
+  plt.ylabel("Frequencies")
+  plt.show()
+
+
+  for i in range(len(SNRs)):
+    plt.figure(i+2)
+    plt.title("Scattering of frequencies for SNR = " + str(SNRs[i]))
+
+    freqs = all_frequencies[i]
+
+    freq_count = Counter(freqs)
+    most_common_freqs = freq_count.most_common()
+
+    for freq_tuple in most_common_freqs:
+      x = floor(freq_tuple[0])
+      y = floor(freq_tuple[1])
+      plt.bar(x, y)
+    
+    plt.xlabel("Frequencies")
+    plt.ylabel("Number of estimates")
+
+    plt.show()
