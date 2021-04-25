@@ -57,7 +57,7 @@ def x_ideal(frequency, phase):
     x = np.empty(cfg.N, dtype=np.complex_)
     
     for n in range(cfg.N):
-        z = 1j*(2 * np.pi * frequency * (cfg.n0+n) * cfg.Ts + phase)
+        z = 1j*(frequency * (cfg.n0+n) * cfg.Ts + phase)
         x[n] = cfg.A * np.exp(z)
 
     return x
