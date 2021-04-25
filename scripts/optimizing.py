@@ -38,117 +38,48 @@ def calculate_optimal_frequency(frequencies):
   # All frequencies are unique
   return np.mean(floored_frequencies)
 
-class Optimize:
-  def __init__(self, M=None, SNR=None, num_optimizations=None):
-    self.N = cfg.N
-    self.T = cfg.Ts
-    self.n0 = cfg.n0
-    self.Fs = cfg.Fs
-
-    if M is None or M <= 0:
-      self.M = 2**10
-    else:
-      self.M = M
-
-    if SNR is None:
-      self.SNR = cfg.SNR
-    else:
-      self.SNR = SNR
-
-    if num_optimizations is None:
-      self.num_opt = cfg.num_opt
-    else:
-      self.num_opt = num_optimizations
-
-    # These values serve as placeholders and must be updated 
-    self.f_hat = cfg.f0
-    self.phi_hat = cfg.phi
-
-  def set_f_hat(self, f_hat):
-    self.f_hat = f_hat
+def mse(list_lhs, list_rhs):
+  """ 
+  Calculates the MSE between two lists. Throws an error if the lists don't
+  have the same lenght
+  """
+  assert(len(list_lhs) == len(list_rhs))
+  return np.square(np.absolute(list_lhs - list_rhs)).mean()
   
-  def set_phi_hat(self, phi_hat):
-    self.phi_hat = phi_hat
+
+def frequency_objective_function(x, M, x_d, phi_hat):
+  """
+  Creates the objective-function for optimizing the frequency. The
+  function assumes the input to be a ndarray, with the first value
+  being the next frequency/iteration to minimize for. The algorithm 
+  uses this frequency to create a theoretical signal, and returns the
+  MSE wrt to the measured signal
+  """
+
+  f_k = x[0]
+  x_f = signals.x_ideal(f_k, phi_hat) # Phase has no effect as it removed through FFT
+
+  Fx_d, _ = fft_estimator.M_point_fft(x_d, M)
+  Fx_f, _ = fft_estimator.M_point_fft(x_f, M)
+
+  return mse(np.absolute(Fx_d), np.absolute(Fx_f))
 
 
-  def mse(self, list_lhs, list_rhs):
-    """ 
-    Calculates the MSE between two lists. Throws an error if the lists don't
-    have the same lenght
-    """
-    assert(len(list_lhs) == len(list_rhs))
-    return np.square(np.absolute(list_lhs - list_rhs)).mean()
-    
+def phase_objective_function(x, x_d, f_hat):
+  """
+  Creates the objective-function for optimizing the phase. The
+  function assumes the input to be a ndarray, with the first value
+  being the next phase/iteration to minimize for. The algorithm 
+  uses this phase to create a theoretical signal, and returns the
+  MSE wrt to the measured signal
+  """
+  phi_k = x[0]
 
-  def frequency_objective_function(self, x):
-    """
-    Creates the objective-function for optimizing the frequency. The
-    function assumes the input to be a ndarray, with the first value
-    being the next frequency/iteration to minimize for. The algorithm 
-    uses this frequency to create a theoretical signal, and returns the
-    MSE wrt to the measured signal
-    """
-    f_k = x[0]
+  x_p = signals.x_ideal(f_hat, phi_k)
 
-    x_d = signals.x_discrete(self.SNR)
-    x_f = signals.x_ideal(f_k, self.phi_hat) # Phase has no effect as it removed through FFT
+  return mse(x_d, x_p)
 
-    Fx_d, _ = fft_estimator.M_point_fft(x_d, self.M)
-    Fx_f, _ = fft_estimator.M_point_fft(x_f, self.M)
-
-    return self.mse(np.absolute(Fx_d), np.absolute(Fx_f))
-
-
-  def phase_objective_function(self, x):
-    """
-    Creates the objective-function for optimizing the phase. The
-    function assumes the input to be a ndarray, with the first value
-    being the next phase/iteration to minimize for. The algorithm 
-    uses this phase to create a theoretical signal, and returns the
-    MSE wrt to the measured signal
-    """
-    phi_k = x[0]
-
-    x_d = signals.x_discrete(self.SNR)
-    x_p = signals.x_ideal(self.f_hat, phi_k)
-
-    return self.mse(x_d, x_p)
-
-
-  def optimize_frequency_nelder_mead(self, x0):
-    """ 
-    Algorithm minimizing the MSE created between the theoretical and
-    measured signal, in hope of estimating the frequency that is 
-    embedded in the measured signal
-
-    Returns lists of optimized frequencies
-    """
-    frequencies = []
-
-    for i in range(self.num_opt):
-        results = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
-        frequencies.append(results.x[0])
-    
-    return frequencies
-
-
-  def optimize_phase_nelder_mead(self, x0):
-    """ 
-    Algorithm minimizing the MSE created between the theoretical and
-    measured signal, in hope of estimating the phase that is 
-    embedded in the measured signal
-
-    Returns lists of optimized phases
-    """
-    phases = []
-
-    for i in range(self.num_opt):
-        results = optimize.minimize(self.phase_objective_function, x0, method="Nelder-Mead")
-        phases.append(results.x[0])
-    
-    return phases
-
-
+"""
 if __name__ == '__main__':
   SNRs = [-10]#, 0, 10, 20, 30, 40, 50, 60]
 
@@ -213,3 +144,4 @@ if __name__ == '__main__':
     plt.ylabel("Number of estimates")
 
     plt.show()
+"""
