@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 import csv
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import cfg
 
+
 def plot_var_task_a(ax, crlb, estimator_variance, ylim=None):
+    plt.tight_layout()
     for i in range(N_ROWS):
         for j in range(N_COLS):
             n = range(N*(2*i+j), N*(2*i+j+1))
@@ -21,6 +24,7 @@ def plot_var_task_a(ax, crlb, estimator_variance, ylim=None):
                 axis.set_ylim(ylim)
 
 def plot_mean_task_a(true_mean, estimated_mean):
+    plt.tight_layout()
     plt.plot([-10, 60], [true_mean, true_mean], 'k')
     for i in range(M):
         n = range(N*i, N*(i+1))
@@ -31,91 +35,106 @@ def plot_mean_task_a(true_mean, estimated_mean):
     plt.ylabel("Mean")
 
 def plot_var_task_b(crlb, estimator_variance):
+    plt.tight_layout()
     plt.semilogy(SNRs, crlb[0:N], 'k.:')
     plt.semilogy(SNRs, estimator_variance[0:N], 'r.-')
     plt.legend(['CRLB', 'Estimator'])
     plt.xlabel("SNR")
     plt.ylabel("Variance")
 
-
-task = 'a'
-
-if task == 'a':
-    filename = "./data/part_a_run_7_N_100.csv"
-if task == 'b':
-    filename= './data/part_b_run_6_N_1000.csv'
-
-SNRs = [-10, 0, 10, 20, 30, 40, 50, 60]
-Ks = [10, 12, 14, 16, 18, 20]
-
-N = len(SNRs)
-M = len(Ks)
-
-crlb_w = np.empty(N*M)
-crlb_phi = np.empty(N*M)
-
-var_w = np.empty(N*M)
-var_phi = np.empty(N*M)
-
-mean_f = np.empty(N*M)
-mean_phi = np.empty(N*M)
-
-w_estimate_valid = np.empty(N*M)
-phi_estimate_valid = np.empty(N*M)
+def plot_mean_task_b(true_mean, estimated_mean):
+    plt.rc('axes.formatter', useoffset=False)
+    plt.plot([-10, 60], [true_mean, true_mean], 'k')
+    plt.plot(SNRs, estimated_mean, 'r.--')
+    plt.legend(["True value", "Fine-tuned estimate"])
+    plt.xlabel("SNR")
+    plt.ylabel("Mean")
 
 
-with open(filename) as csvfile:
+if __name__ == '__main__':
+    task = sys.argv[1]
 
-    reader = csv.reader(csvfile, delimiter=' ')
+    if task == 'a':
+        filename = "./data/part_a_run_7_N_100.csv"
+    elif task == 'b':
+        filename= './data/part_b_run_6_N_1000.csv'
+    else:
+        print("'Task' argument has to either be 'a' or 'b', exiting...")
+        exit(1)
+        
+    SNRs = [-10, 0, 10, 20, 30, 40, 50, 60]
+    Ks = [10, 12, 14, 16, 18, 20]
 
-    i = 0
-    for row in reader:
-        K           = row[1]
+    N = len(SNRs)
+    M = len(Ks)
 
-        crlb_w[i]   = row[2]
-        var_w[i]    = row[3]
+    crlb_w = np.empty(N*M)
+    crlb_phi = np.empty(N*M)
 
-        crlb_phi[i] = row[5]
-        var_phi[i]  = row[6]
+    var_w = np.empty(N*M)
+    var_phi = np.empty(N*M)
 
-        mean_f[i]   = row[8]
-        mean_phi[i] = row[9]
+    mean_f = np.empty(N*M)
+    mean_phi = np.empty(N*M)
 
-        w_estimate_valid[i]   = bool(row[4])
-        phi_estimate_valid[i] = bool(row[7])
-
-        i += 1
-
-if task == 'a':
-    N_ROWS = M/2
-    N_COLS = 2
-
-    w_fig, ax = plt.subplots(N_ROWS, N_COLS)
-    plt.figure(w_fig.number)
-    plt.tight_layout()
-    plot_var_task_a(ax, crlb_w, var_w, [0.01, 1e7])
-
-    phi_fig, ax = plt.subplots(N_ROWS, N_COLS)
-    plt.figure(phi_fig.number)
-    plt.tight_layout()
-    plot_var_task_a(ax, crlb_phi, var_phi)
+    w_estimate_valid = np.empty(N*M)
+    phi_estimate_valid = np.empty(N*M)
 
 
-    plt.figure(3)
-    plot_mean_task_a(cfg.f0, mean_f)
+    with open(filename) as csvfile:
 
-    plt.figure(4)
-    plot_mean_task_a(cfg.phi, mean_phi)
+        reader = csv.reader(csvfile, delimiter=' ')
 
-if task == 'b':
+        i = 0
+        for row in reader:
+            K           = row[1]
 
-    plt.figure(1)
-    plt.tight_layout()
-    plot_var_task_b(crlb_w, var_w)
+            crlb_w[i]   = row[2]
+            var_w[i]    = row[3]
 
-    plt.figure(2)
-    plt.tight_layout()
-    plot_var_task_b(crlb_phi, var_phi)
+            crlb_phi[i] = row[5]
+            var_phi[i]  = row[6]
 
-plt.show()
+            mean_f[i]   = row[8]
+            mean_phi[i] = row[9]
+
+            w_estimate_valid[i]   = bool(row[4])
+            phi_estimate_valid[i] = bool(row[7])
+
+            i += 1
+
+    if task == 'a':
+        N_ROWS = M/2
+        N_COLS = 2
+
+        _, ax = plt.subplots(N_ROWS, N_COLS)
+        plt.figure(1)
+        plot_var_task_a(ax, crlb_w, var_w, [0.01, 1e7])
+
+        _, ax = plt.subplots(N_ROWS, N_COLS)
+        plt.figure(2)
+        plot_var_task_a(ax, crlb_phi, var_phi)
+
+
+        plt.figure(3)
+        plot_mean_task_a(cfg.f0, mean_f)
+
+        plt.figure(4)
+        plot_mean_task_a(cfg.phi, mean_phi)
+
+    if task == 'b':
+
+        plt.figure(1)
+        plot_var_task_b(crlb_w, var_w)
+
+        plt.figure(2)
+        plot_var_task_b(crlb_phi, var_phi)
+
+        plt.figure(3)
+        plot_mean_task_b(cfg.f0, mean_f[0:N])
+
+        plt.figure(4)
+        plot_mean_task_b(cfg.phi, mean_phi[0:N])
+
+    plt.show()
 
