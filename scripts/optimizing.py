@@ -1,145 +1,147 @@
 #!/usr/bin/env python
 
-import cfg
-import numpy as np
+import csv
 import matplotlib.pyplot as plt
+from collections import Counter
 
-import signals
-import fft_estimator
-
-from datetime import datetime as dt
 from scipy import optimize
+from math import pi, floor
+import numpy as np
 
-"""
-In this file, we should try to optimize the performance of the estimate
-of omega and the phase. This is done by minimizing MSE with the help of 
-the Nelder-Mead-algorithm
-"""
+import fft_estimator
+import signals
+import cfg
 
-class Optimize:
-  def __init__(self, SNR_dB, f0=None, phi0=None, M=None):
-    self.N = cfg.N
-    self.T = cfg.Ts
-    self.n0 = cfg.n0
-    self.Fs = cfg.Fs
+
+def calculate_optimal_frequency(frequencies):
+  """ 
+  This algorithm is an attempt in calculating the optimal frequency
+
+  This algorithm will attempt to identify the frequency which occurs 
+  the most. To prevent any decimal-values for affecting the results, the
+  algorithm floors the input. Therefore the function assumes the input to 
+  have frequencies >= 1 Hz
+
+  The algorithm will return the floored frequency that occurs the most
+
+  If all frequencies are different, the algorithm will use the sample
+  mean
+  """
+  floored_frequencies = [floor(freq) for freq in frequencies]
+  counted_frequencies = Counter(floored_frequencies)
   
-    self.SNR_dB = SNR_dB
+  most_common_freq = counted_frequencies.most_common(1)
 
-    if f0 is None:
-      self.f0 = cfg.f0
-    else:
-      self.f0 = f0
+  if most_common_freq[0][1] > 1:
+    return most_common_freq[0][0]
+  
+  # All frequencies are unique
+  return np.mean(floored_frequencies)
 
-    if phi0 is None:
-      self.phi0 = cfg.phi
-    else:
-      self.phi0 = phi0
+def mse(list_lhs, list_rhs):
+  """ 
+  Calculates the MSE between two lists. Throws an error if the lists don't
+  have the same lenght
+  """
+  assert(len(list_lhs) == len(list_rhs))
+  return np.square(np.absolute(list_lhs - list_rhs)).mean()
+  
 
-    if M is None or M <= 0:
-      self.M = 2**10
-    else:
-      self.M = M
+def frequency_objective_function(x, M, x_d, phi_hat):
+  """
+  Creates the objective-function for optimizing the frequency. The
+  function assumes the input to be a ndarray, with the first value
+  being the next frequency/iteration to minimize for. The algorithm 
+  uses this frequency to create a theoretical signal, and returns the
+  MSE wrt to the measured signal
+  """
 
+  f_k = x[0]
+  x_f = signals.x_ideal(f_k, phi_hat) # Phase has no effect as it removed through FFT
 
-  def mse(self, list_lhs, list_rhs):
-    assert(len(list_lhs) == len(list_rhs))
-    return np.square(np.absolute(list_lhs - list_rhs)).mean()
-    
+  Fx_d, _ = fft_estimator.M_point_fft(x_d, M)
+  Fx_f, _ = fft_estimator.M_point_fft(x_f, M)
 
-  def frequency_objective_function(self, x):
-    # Estimate number k for frequency from NM-algorithm 
-    f_k = x[0]
-
-    # Creating signals
-    x_d = signals.x_discrete(self.SNR_dB)
-    x_f = signals.x_frequency(f_k)
-
-    Fx_d, _ = fft_estimator.M_point_fft(x_d, self.M)
-    Fx_f, _ = fft_estimator.M_point_fft(x_f, self.M)
-
-    # Tries minimizing the error with MSE
-    return self.mse(np.absolute(Fx_d), np.absolute(Fx_f))
+  return mse(np.absolute(Fx_d), np.absolute(Fx_f))
 
 
-  def phase_objective_function(self, x):
-    # Estimate number k for the phase
-    phi_k = x[0]
+def phase_objective_function(x, x_d, f_hat):
+  """
+  Creates the objective-function for optimizing the phase. The
+  function assumes the input to be a ndarray, with the first value
+  being the next phase/iteration to minimize for. The algorithm 
+  uses this phase to create a theoretical signal, and returns the
+  MSE wrt to the measured signal
+  """
+  phi_k = x[0]
 
-    # Creating signals
-    x_d = signals.x_discrete(self.SNR_dB)
-    x_p = signals.x_phase(phi_k)
+  x_p = signals.x_ideal(f_hat, phi_k)
 
-    # Tries minimizing the error with MSE
-    return self.mse(x_d, x_p)
+  return mse(x_d, x_p)
 
-
-  def optimize_frequency_nelder_mead(self, x0, max_iterations):
-    frequencies = np.zeros(max_iterations)
-    mse = np.zeros(max_iterations)
-
-    for i in range(max_iterations):
-        frequency = optimize.minimize(self.frequency_objective_function, x0, method="Nelder-Mead")
-        frequencies[i] = frequency.x[0]
-        mse[i] = (self.f0 - frequency.x[0])**2
-    
-    return frequencies, mse
-
-
-  def optimize_phase_nelder_mead(self, x0, max_iterations):
-    phases = np.zeros(max_iterations)
-    mse = np.zeros(max_iterations)
-
-    for i in range(max_iterations):
-        phase = optimize.minimize(self.phase_objective_function, x0, method="Nelder-Mead")
-        phases[i] = phase.x[0]
-        mse[i] = (self.phi0 - phase.x[0])**2
-    
-    return phases, mse
-
-  # Doesn't quite work
-  # def plot_mse(self, min_frequency, max_frequency, frequency_step):
-  #   mse = []    
-  #   it = [1,2]
-  #   for f in range(min_frequency, max_frequency, frequency_step):
-  #       it[0] = f
-  #       mse.append(self.objective_function(it))
-
-  #   plt.figure(2)
-  #   plt.title("MSE")
-  #   plt.xlabel("Frequency [Hz]")
-  #   plt.ylabel("Mean Square Error")
-  #   plt.plot(np.arange(min_frequency, max_frequency, frequency_step), mse)
-
-
+"""
 if __name__ == '__main__':
-  opt = Optimize(SNR_dB=10)
+  SNRs = [-10]#, 0, 10, 20, 30, 40, 50, 60]
 
-  ## Optimize the frequency and phase ##
-  f0 = 1.5e5
-  phi0 = np.pi / 2.0
-  max_iterations = 100
+  f0 = 150000
+  phi0 = pi / 2.0
 
-  begin = dt.now()
-  frequencies, mse_freq = opt.optimize_frequency_nelder_mead(f0, max_iterations)
-  phases, mse_phase = opt.optimize_phase_nelder_mead(phi0, max_iterations)
+  all_frequencies = []
+  all_phases = []
 
+  avg_frequency = []
+  avg_phase = []
 
-  mean_frequency = np.mean(frequencies)
-  # mean_mse_freq = np.mean(mse_freq) 
-  mean_phase = np.mean(phases)
-  # mean_mse_phase = np.mean(mse_phase)
+  var_frequency = []
+  var_phase = []
   
-  # mse_freq_variance = np.variance(mse_freq, mean_mse_freq)
-  # mse_phase_variance = np.variance(mse_phase, mean_mse_phase)
-  end = dt.now()
-  print("Calculation time: %f seconds" % float((end - begin).total_seconds()))
+  for SNR in SNRs:
+    opt = Optimize(SNR=SNR)
 
-  print("Last optimized frequency:", frequencies[-1])
-  print("Average optimized frequency:", mean_frequency)
-  # print("Average optimized mse:", mean_mse_freq)
-  # print("Average optimized mse variance:", mse_freq_variance)
+    frequencies = opt.optimize_frequency_nelder_mead(f0)
+    optimal_frequency = calculate_optimal_frequency(frequencies)
+    opt.set_f_hat(optimal_frequency)
+    phases = opt.optimize_phase_nelder_mead(phi0)
 
-  print("Last optimized phase:", phases[-1])
-  print("Average optimized phase:", mean_phase)
-  # print("Average optimized mse:", mean_mse_phase)
-  # print("Average optimized mse variance:", mse_phase_variance)
+    avg_frequency.append(np.average(frequencies))
+    var_frequency.append(np.var(frequencies))
+
+    avg_phase.append(np.average(phases))
+    var_phase.append(np.var(phases))
+
+    all_frequencies.append(frequencies)
+    all_phases.append(phases)
+  
+  plt.figure(1)
+  plt.title("Scattering of frequencies for a given SNR")
+  for i in range(len(SNRs)):
+    y = all_frequencies[i]
+    x = [SNRs[i] for k in range(len(y))]
+
+    plt.scatter(x, y, color='green')
+    plt.scatter(SNRs[i], f0, color='red')
+
+  plt.xlabel("SNR")
+  plt.ylabel("Frequencies")
+  plt.show()
+
+
+  for i in range(len(SNRs)):
+    plt.figure(i+2)
+    plt.title("Scattering of frequencies for SNR = " + str(SNRs[i]))
+
+    freqs = all_frequencies[i]
+
+    freq_count = Counter(freqs)
+    most_common_freqs = freq_count.most_common()
+
+    for freq_tuple in most_common_freqs:
+      x = floor(freq_tuple[0])
+      y = floor(freq_tuple[1])
+      plt.bar(x, y)
+    
+    plt.xlabel("Frequencies")
+    plt.ylabel("Number of estimates")
+
+    plt.show()
+"""

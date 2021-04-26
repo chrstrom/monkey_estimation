@@ -5,7 +5,6 @@ import signals as sig
 
 
 def omega(SNR_dB):
-
     sigma_squared = sig.sigma_squared_from_SNR_dB(SNR_dB)
 
     numerator = 12*sigma_squared

@@ -5,6 +5,46 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cfg
 
+def plot_var_task_a(ax, crlb, estimator_variance, ylim=None):
+    for i in range(N_ROWS):
+        for j in range(N_COLS):
+            n = range(N*(2*i+j), N*(2*i+j+1))
+            axis = ax[i][j]
+            axis.semilogy(SNRs, crlb[n], 'k.:')
+            axis.semilogy(SNRs, estimator_variance[n], 'r.-')
+            axis.set_title("FFT length = 2^" + str(4*i + 2*j + 10))
+            axis.set_xlabel("SNR")
+            axis.set_ylabel("Variance")
+            axis.legend(['CRLB', 'Estimator'])
+
+            if ylim is not None:
+                axis.set_ylim(ylim)
+
+def plot_mean_task_a(true_mean, estimated_mean):
+    plt.plot([-10, 60], [true_mean, true_mean], 'k')
+    for i in range(M):
+        n = range(N*i, N*(i+1))
+        plt.plot(SNRs, estimated_mean[n], '.--')
+
+    plt.legend(["True value", "2^10", "2^12", "2^14", "2^16", "2^18", "2^20"])
+    plt.xlabel("SNR")
+    plt.ylabel("Mean")
+
+def plot_var_task_b(crlb, estimator_variance):
+    plt.semilogy(SNRs, crlb[0:N], 'k.:')
+    plt.semilogy(SNRs, estimator_variance[0:N], 'r.-')
+    plt.legend(['CRLB', 'Estimator'])
+    plt.xlabel("SNR")
+    plt.ylabel("Variance")
+
+
+task = 'a'
+
+if task == 'a':
+    filename = "./data/part_a_run_7_N_100.csv"
+if task == 'b':
+    filename= './data/part_b_run_6_N_1000.csv'
+
 SNRs = [-10, 0, 10, 20, 30, 40, 50, 60]
 Ks = [10, 12, 14, 16, 18, 20]
 
@@ -17,14 +57,14 @@ crlb_phi = np.empty(N*M)
 var_w = np.empty(N*M)
 var_phi = np.empty(N*M)
 
-mean_w = np.empty(N*M)
+mean_f = np.empty(N*M)
 mean_phi = np.empty(N*M)
 
 w_estimate_valid = np.empty(N*M)
 phi_estimate_valid = np.empty(N*M)
 
-# format: SNR_dB, K, crlb_w, var_w, w_estimate_valid, crlb_phi, var_phi, phi_estimate_valid, mean_w, mean_phi
-with open('./data/run_2_N_30000.csv') as csvfile:
+
+with open(filename) as csvfile:
 
     reader = csv.reader(csvfile, delimiter=' ')
 
@@ -38,7 +78,7 @@ with open('./data/run_2_N_30000.csv') as csvfile:
         crlb_phi[i] = row[5]
         var_phi[i]  = row[6]
 
-        mean_w[i]   = row[8]
+        mean_f[i]   = row[8]
         mean_phi[i] = row[9]
 
         w_estimate_valid[i]   = bool(row[4])
@@ -46,65 +86,36 @@ with open('./data/run_2_N_30000.csv') as csvfile:
 
         i += 1
 
-N_ROWS = M/2
-N_COLS = 2
+if task == 'a':
+    N_ROWS = M/2
+    N_COLS = 2
 
-w_fig, ax = plt.subplots(N_ROWS, N_COLS)
-plt.figure(w_fig.number)
-#plt.title("Variance for the omega estimate for varying FFT length")
-plt.tight_layout()
-for i in range(N_ROWS):
-    for j in range(N_COLS):
-        n = range(N*(2*i+j), N*(2*i+j+1))
-        axis = ax[i][j]
-        axis.semilogy(SNRs, crlb_w[n], 'k.:')
-        axis.semilogy(SNRs, var_w[n], 'r.-')
-        axis.set_title("FFT length = 2^" + str(4*i + 2*j + 10))
-        axis.set_xlabel("SNR")
-        axis.set_ylabel("Variance")
-        axis.set_ylim(0.01)
-        axis.legend(['CRLB', 'Estimator'])
+    w_fig, ax = plt.subplots(N_ROWS, N_COLS)
+    plt.figure(w_fig.number)
+    plt.tight_layout()
+    plot_var_task_a(ax, crlb_w, var_w, [0.01, 1e7])
+
+    phi_fig, ax = plt.subplots(N_ROWS, N_COLS)
+    plt.figure(phi_fig.number)
+    plt.tight_layout()
+    plot_var_task_a(ax, crlb_phi, var_phi)
 
 
-phi_fig, ax = plt.subplots(N_ROWS, N_COLS)
-plt.figure(phi_fig.number)
-#plt.title("Variance for the phi estimate for varying FFT length")
-plt.tight_layout()
-for i in range(N_ROWS):
-    for j in range(N_COLS):
-        n = range(N*(2*i+j), N*(2*i+j+1))
-        axis = ax[i][j]
-        axis.semilogy(SNRs, crlb_phi[n], 'k.:')
-        axis.semilogy(SNRs, var_phi[n], 'r.-')
-        axis.set_title("FFT length = 2^" + str(4*i + 2*j + 10))
-        axis.set_xlabel("SNR")
-        axis.set_ylabel("Variance")
-        axis.legend(['CRLB', 'Estimator'])
+    plt.figure(3)
+    plot_mean_task_a(cfg.f0, mean_f)
 
+    plt.figure(4)
+    plot_mean_task_a(cfg.phi, mean_phi)
 
-plt.figure(3)
-#plt.title("Difference in the mean omega from one SNR value to the next, for varying FFT length")
-#plt.title("Mean for the omega estimate for varying FFT length and SNRs")
-plt.plot([-10, 60], [cfg.w0, cfg.w0], 'k')
-for i in range(M):
-    n = range(N*i, N*(i+1))
-    #plt.semilogy(SNRs[1:], np.abs(np.diff(mean_w[n])), '.--')
-    plt.plot(SNRs, mean_w[n], '.--')
+if task == 'b':
 
-plt.legend(["True value", "2^10", "2^12", "2^14", "2^16", "2^18", "2^20"])
-plt.xlabel("SNR")
-plt.ylabel("Mean")
+    plt.figure(1)
+    plt.tight_layout()
+    plot_var_task_b(crlb_w, var_w)
 
-
-plt.figure(4)
-#plt.title("Mean for the phi estimate for varying FFT length and SNRs")
-plt.plot([-10, 60], [cfg.phi, cfg.phi], 'k')
-for i in range(M):
-    n = range(N*i, N*(i+1))
-    plt.plot(SNRs, mean_phi[n], '.--')
-
-plt.legend(["True value", "2^10", "2^12", "2^14", "2^16", "2^18", "2^20"])
-plt.xlabel("SNR")
-plt.ylabel("Mean")
+    plt.figure(2)
+    plt.tight_layout()
+    plot_var_task_b(crlb_phi, var_phi)
 
 plt.show()
+
