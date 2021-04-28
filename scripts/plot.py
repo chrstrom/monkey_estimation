@@ -52,14 +52,19 @@ def plot_mean_task_b(true_mean, estimated_mean):
 
 
 if __name__ == '__main__':
-    task = sys.argv[1]
 
-    if task == 'a':
-        filename = "./data/part_a_run_7_N_100.csv"
-    elif task == 'b':
-        filename= './data/part_b_run_6_N_1000.csv'
+    try:
+        filename = sys.argv[1]
+    except Exception as e:
+        print("No input file provided, exiting. \n Usage: python plot.py 'filename.csv'")
+        exit(1)
+
+    if "_a_" in filename:
+        task = 'a'
+    elif "_b_" in filename:
+        task = 'b'
     else:
-        print("'Task' argument has to either be 'a' or 'b', exiting...")
+        print("No matching task file provided, exiting...")
         exit(1)
         
     SNRs = [-10, 0, 10, 20, 30, 40, 50, 60]
