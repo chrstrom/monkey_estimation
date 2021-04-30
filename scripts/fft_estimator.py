@@ -53,7 +53,4 @@ def M_point_fft(x_d, M):
     Fw = np.fft.fft(x_d, M)
     Ff = np.fft.fftfreq(M, 1 / cfg.Fs)
 
-    Fw = np.fft.fftshift(Fw)
-    Ff = np.fft.fftshift(Ff)
-
     return Fw, Ff
