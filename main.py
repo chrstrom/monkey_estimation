@@ -4,7 +4,7 @@ import csv
 import sys
 import os, os.path
 import numpy as np
-import matplotlib.pyplot as plt
+
 from datetime import datetime as dt
 from scipy import optimize
 
