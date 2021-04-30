@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import csv
+import sys
 import os, os.path
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,14 +15,20 @@ from scripts import utility
 from scripts import crlb
 from scripts import cfg
 
-task = 'a'
+
+try:
+    task = sys.argv[1]
+except Exception as e:
+    print("No input task provided, exiting. \n Usage: python main.py <task>")
+    exit(1)
+
 
 SNR_dBs =[-10, 0, 10, 20, 30, 40, 50, 60]
 FFT_Ks = [10, 12, 14, 16, 18, 20]
 
 n = len(SNR_dBs)
 m = len(FFT_Ks)
-N = 1000  # Amount of samples to generate when estimating variance
+N = 100  # Amount of samples to generate when estimating variance
 
 # Generate unique filename for data file output
 run_number = len([name for name in os.listdir('./data') if os.path.isfile('./data/' + name)])
@@ -93,6 +100,8 @@ if task == 'b':
     with open(filename, 'ab') as file:
         writer = csv.writer(file, delimiter=' ')
         M = 2**10
+        
+        total_time_begin = dt.now()
         for SNR_dB in SNR_dBs:
 
             w_estimates = np.zeros(N)
@@ -145,3 +154,6 @@ if task == 'b':
             print("FREQUENCY  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_f, var_f, crlb_f))
             print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
             print("")
+
+        total_time_end = dt.now()
+        utility.print_execution_time(total_time_begin, total_time_end)
