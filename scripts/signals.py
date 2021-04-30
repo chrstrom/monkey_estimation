@@ -49,7 +49,7 @@ def x_discrete(SNR_dB):
     return x + w
 
 
-def x_ideal(frequency, phase):
+def x_ideal(omega, phase):
     """ 
     Generates a complex-exponential signal with given frequency
     and phase. Does not contain noise
@@ -57,7 +57,7 @@ def x_ideal(frequency, phase):
     x = np.empty(cfg.N, dtype=np.complex_)
     
     for n in range(cfg.N):
-        z = 1j*(frequency * (cfg.n0+n) * cfg.Ts + phase)
+        z = 1j*(omega * (cfg.n0+n) * cfg.Ts + phase)
         x[n] = cfg.A * np.exp(z)
 
     return x

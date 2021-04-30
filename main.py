@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import csv
+import sys
 import os, os.path
 import numpy as np
-import matplotlib.pyplot as plt
+
 from datetime import datetime as dt
 from scipy import optimize
 
@@ -14,15 +15,22 @@ from scripts import utility
 from scripts import crlb
 from scripts import cfg
 
-task = 'b'
 
-SNR_dBs =[-10, 0, 10, 20, 30, 40, 50, 60] # 
+try:
+    task = sys.argv[1]
+except Exception as e:
+    print("No input task provided, exiting. \n Usage: python main.py <task>")
+    exit(1)
+
+
+SNR_dBs =[-10, 0, 10, 20, 30, 40, 50, 60]
 FFT_Ks = [10, 12, 14, 16, 18, 20]
 
 n = len(SNR_dBs)
 m = len(FFT_Ks)
 N = 100  # Amount of samples to generate when estimating variance
 
+# Generate unique filename for data file output
 run_number = len([name for name in os.listdir('./data') if os.path.isfile('./data/' + name)])
 
 if task == 'a':
@@ -53,7 +61,7 @@ if task == 'a':
 
                     status_bar_progress = utility.print_status_bar(k, status_bar_progress, N)
 
-                mean_f = np.mean(w_estimates) / (m*2*np.pi)
+                mean_f = np.mean(w_estimates) / (2*np.pi)
                 mean_phi = np.mean(phi_estimates)
 
                 var_f = np.var(w_estimates)
@@ -92,6 +100,8 @@ if task == 'b':
     with open(filename, 'ab') as file:
         writer = csv.writer(file, delimiter=' ')
         M = 2**10
+        
+        total_time_begin = dt.now()
         for SNR_dB in SNR_dBs:
 
             w_estimates = np.zeros(N)
@@ -105,10 +115,9 @@ if task == 'b':
                 x_d = sig.x_discrete(SNR_dB)
 
                 omega_hat, phi_hat, _, _ = fft_estimator.estimator(x_d, M)
-                f_hat = omega_hat/ (2*np.pi)
 
-                omega_opt = optimize.minimize(optimizing.frequency_objective_function, f_hat, method="Nelder-Mead", args=(M, x_d, phi_hat))
-                phase_opt = optimize.minimize(optimizing.phase_objective_function, phi_hat, method="Nelder-Mead", args=(x_d, f_hat))
+                omega_opt = optimize.minimize(optimizing.frequency_objective_function, omega_hat, method="Nelder-Mead", args=(M, x_d, phi_hat))
+                phase_opt = optimize.minimize(optimizing.phase_objective_function, phi_hat, method="Nelder-Mead", args=(x_d, omega_hat))
 
                 w_estimates[i] = omega_opt.x[0]
                 phi_estimates[i] = phase_opt.x[0]
@@ -145,3 +154,6 @@ if task == 'b':
             print("FREQUENCY  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_f, var_f, crlb_f))
             print("PHASE  | estimated mean: {}, estimated variance: {}, crlb: {}".format(mean_phi, var_phi, crlb_phi))
             print("")
+
+        total_time_end = dt.now()
+        utility.print_execution_time(total_time_begin, total_time_end)
