@@ -1,5 +1,5 @@
 # monkey_estimation
-Code for the Estimation (1) project in TTT4275
+Code for the Estimation (1) project in TTT4275. The report can be found in the /resources folder : )
 
 ## How to run
 This repo contains two driver scripts:
